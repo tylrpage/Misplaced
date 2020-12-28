@@ -1,3 +1,6 @@
+# private certs
+*.pfx
+
 *.swp
 *.*~
 project.lock.json
