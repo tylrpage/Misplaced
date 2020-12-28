@@ -31,6 +31,7 @@ namespace Server
             };
 
             Console.ReadLine();
+            return 0;
         }
     }
 }
