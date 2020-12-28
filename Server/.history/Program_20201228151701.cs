@@ -28,7 +28,7 @@ namespace Server
             _webServer.onData += delegate(int i, ArraySegment<byte> data) {
                 string msg = System.Text.Encoding.UTF8.GetString(data.Array);
                 Console.WriteLine($"Client {i} send: {msg}");
-            };
+            }
         }
     }
 }
