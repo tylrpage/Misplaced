@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Mirror.SimpleWeb
 {
@@ -70,12 +69,11 @@ namespace Mirror.SimpleWeb
             return server.GetClientAddress(connectionId);
         }
 
-        public void ProcessMessageQueue(MonoBehaviour behaviour)
+        public void ProcessMessageQueue()
         {
             int processedCount = 0;
             // check enabled every time incase behaviour was disabled after data
             while (
-                behaviour.enabled &&
                 processedCount < maxMessagesPerTick &&
                 // Dequeue last
                 server.receiveQueue.TryDequeue(out Message next)
