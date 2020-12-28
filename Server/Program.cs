@@ -30,7 +30,12 @@ namespace Server
                 Console.WriteLine($"Client {i} send: {msg}");
             };
 
-            Console.ReadLine();
+            while (!Console.KeyAvailable) {
+                _webServer.ProcessMessageQueue();
+            }
+
+            Console.WriteLine("Closing server");
+            _webServer.Stop();
         }
     }
 }
