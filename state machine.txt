@@ -1,0 +1,27 @@
+Game State
+ 
+- Waiting State
+ - Players + Builder: Sees waiting screen with number of players
+ - Server: If 2 of more player present: enter Begin state
+
+- Begin State
+ - Select a builder, send builder message, builder goes into builder view
+ - Tell players game is starting
+ - Server: Waits a few seconds, enters building state
+
+- Builder mode
+ - Builder can move 3 objects then sends complete message to server containing changes
+ - Players wait in waiting room
+ - server: after 20 seconds or when complete message is receive: enter search state
+
+- Search State
+ - Builder: Views room from builder mode
+ - Players: Walk around and are able to interact with objects, if they choose an object
+ 	    they tell the server, if right they get a point, if wrong they lose a point
+ - Server: After 40 seconds or when all players found all changes: enter scoring state
+
+- Scoring State
+ - Builder: Gets points for each player who found nothing
+ - Players: Gets new point totals based on rights and wrongs
+ - Server: After 10 seconds, if more 2 or more players, goto begin state, else, waiting state
+ 
