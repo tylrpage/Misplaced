@@ -818,7 +818,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 1024
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2092,7 +2092,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocalPlayerTransform: {fileID: 1439826207}
-  StatusText: {fileID: 0}
+  StatusText: {fileID: 285585932}
   MaxInteractRange: 2.5
   CorrectItems: 0
   WrongItems: 0

@@ -33,6 +33,6 @@ public class Nametag : MonoBehaviour
 
     private void UpdateText()
     {
-        NameText.text = name + "\npts: " + _pts;
+        NameText.text = _name + "\npts: " + _pts;
     }
 }

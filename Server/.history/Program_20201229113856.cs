@@ -174,7 +174,6 @@ namespace Server
                             foreach (PlayerData data in _playerDatas.Values) {
                                 _bitBuffer.AddUShort(data.id);
                                 _bitBuffer.AddShort(data.points);
-
                                 Console.WriteLine($"Points: {data.id} {data.points}");
                             }
 
@@ -272,8 +271,6 @@ namespace Server
                 {
                     short pointChange = _bitBuffer.ReadShort();
                     _playerDatas[id].points += pointChange;
-
-                    Console.WriteLine($"Got point change {id} {pointChange}");
 
                     // If points are 0 or less, give builder a point
                     if (pointChange <= 0) {

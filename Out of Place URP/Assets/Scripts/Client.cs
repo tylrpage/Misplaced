@@ -146,8 +146,15 @@ public class Client : MonoBehaviour
                     ushort id = _bitBuffer.ReadUShort();
                     short points = _bitBuffer.ReadShort();
                     _points[id] = points;
-                    
-                    _otherPlayers[id].GetComponent<Nametag>().SetPts(points);
+
+                    if (_myId == id)
+                    {
+                        LocalPlayerTransform.GetComponent<Nametag>().SetPts(points);
+                    }
+                    else
+                    {
+                        _otherPlayers[id].GetComponent<Nametag>().SetPts(points);
+                    }
                 }
 
                 break;
