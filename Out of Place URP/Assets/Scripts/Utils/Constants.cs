@@ -26,5 +26,6 @@ public static class Constants
     };
 
     public static readonly int CLIENT_TICKRATE = 25;
-    public static readonly int[] CAMERA_REF_RESOLUTION = new[] {192, 120};
+    public static readonly int[] CAMERA_REF_RESOLUTION = new[] {800, 480};
+    public static readonly int CAMERA_ASSET_PPU = 64;
 }

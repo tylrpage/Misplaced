@@ -25,15 +25,13 @@ public class CameraController : MonoBehaviour
     private void ClientOnExitingBuildingMode()
     {
         PixelPerfectCamera pixelPerfectCamera = GetComponent<PixelPerfectCamera>();
-        pixelPerfectCamera.refResolutionX = Constants.CAMERA_REF_RESOLUTION[0];
-        pixelPerfectCamera.refResolutionY = Constants.CAMERA_REF_RESOLUTION[1];
+        pixelPerfectCamera.assetsPPU = Constants.CAMERA_ASSET_PPU;
     }
 
     private void ClientOnEnteringBuildingMode()
     {
         PixelPerfectCamera pixelPerfectCamera = GetComponent<PixelPerfectCamera>();
-        pixelPerfectCamera.refResolutionX = Constants.CAMERA_REF_RESOLUTION[0] * 2;
-        pixelPerfectCamera.refResolutionY = Constants.CAMERA_REF_RESOLUTION[1] * 2;
+        pixelPerfectCamera.assetsPPU = Constants.CAMERA_ASSET_PPU / 2;
     }
 
     // Update is called once per frame
