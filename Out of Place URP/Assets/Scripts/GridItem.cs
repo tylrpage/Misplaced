@@ -31,6 +31,13 @@ public class GridItem : MonoBehaviour
         transform.position = new Vector3(GridXToWorldPos(X), GridYToWorldPos(Y), 0);
     }
 
+    public void MoveToGridPos(ushort x, ushort y)
+    {
+        X = x;
+        Y = y;
+        transform.position = new Vector3(GridXToWorldPos(x), GridYToWorldPos(y), 0);
+    }
+
     public void ResetPosition()
     {
         X = InitialX;

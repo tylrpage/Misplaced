@@ -252,6 +252,7 @@ public class Client : MonoBehaviour
                     ushort newX = _bitBuffer.ReadUShort();
                     ushort newY = _bitBuffer.ReadUShort();
                     _movedItems[objectId] = new Tuple<int, int>(newX, newY);
+                    Debug.Log("New Item " + objectId + ", x: " + newX + ", y: " + newY);
                 }
                 
                 // If we are not builder, enter searching mode
@@ -332,7 +333,7 @@ public class Client : MonoBehaviour
         foreach (var movedItem in _movedItems)
         {
             GridItem gridItem = moveableReferencer.Moveables[movedItem.Key];
-            gridItem.Move(new Vector2(movedItem.Value.Item1, movedItem.Value.Item2));
+            gridItem.MoveToGridPos((ushort)movedItem.Value.Item1, (ushort)movedItem.Value.Item2);
         }
         
         Interacter interacter = GetComponent<Interacter>();

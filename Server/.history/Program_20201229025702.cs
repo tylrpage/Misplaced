@@ -339,8 +339,6 @@ namespace Server
                     _bitBuffer.AddUShort(movedObject.Key);
                     _bitBuffer.AddUShort(movedObject.Value.Item1);
                     _bitBuffer.AddUShort(movedObject.Value.Item1);
-
-                    Console.WriteLine($"Moved object. ID: {movedObject.Key}, X: {movedObject.Value.Item1}, Y: {movedObject.Value.Item2}")
                 }
 
                 _bitBuffer.ToArray(_buffer);
