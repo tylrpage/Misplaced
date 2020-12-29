@@ -32,14 +32,7 @@ public class Client : MonoBehaviour
     private float _timeToSendNextUpdate = 0;
     private GameState _currentState;
     private ushort _builderId;
-    private HashSet<ushort> _movedItems;
-
-    private void Start()
-    {
-        EnterSearchMode();
-        _movedItems = new HashSet<ushort>();
-        _movedItems.Add(1);
-    }
+    private Dictionary<ushort, Tuple<int, int>> _movedItems;
 
     private void Awake()
     {
@@ -251,12 +244,14 @@ public class Client : MonoBehaviour
             }
             case GameState.Search:
             {
-                _movedItems = new HashSet<ushort>();
+                _movedItems = new Dictionary<ushort, Tuple<int, int>>();
                 int count = _bitBuffer.ReadUShort();
                 for (int i = 0; i < count; i++)
                 {
                     ushort objectId = _bitBuffer.ReadUShort();
-                    _movedItems.Add(objectId);
+                    ushort newX = _bitBuffer.ReadUShort();
+                    ushort newY = _bitBuffer.ReadUShort();
+                    _movedItems[objectId] = new Tuple<int, int>(newX, newY);
                 }
                 
                 // If we are not builder, enter searching mode
@@ -289,7 +284,7 @@ public class Client : MonoBehaviour
 
     private void EnterBuildingMode()
     {
-        _movedItems = new HashSet<ushort>();
+        _movedItems = new Dictionary<ushort, Tuple<int, int>>();
         GetComponent<Builder>().enabled = true;
         EnteringBuildingMode?.Invoke();
         LocalPlayerTransform.position = MainRoomLocation.position;
@@ -303,18 +298,20 @@ public class Client : MonoBehaviour
         StatusText.enabled = false;
     }
     
-    private void BuilderOnObjectMoved(ushort objectId)
+    private void BuilderOnObjectMoved(ushort objectId, int newX, int newY)
     {
         // If we haven't moved this object before
-        if (!_movedItems.Contains(objectId))
+        if (!_movedItems.ContainsKey(objectId))
         {
-            _movedItems.Add(objectId);
+            _movedItems[objectId] = new Tuple<int, int>(newX, newY);
             UpdateBuilderStatusText();
             
             // Tell server we moved an object
             _bitBuffer.Clear();
             _bitBuffer.AddByte(10);
             _bitBuffer.AddUShort(objectId);
+            _bitBuffer.AddUShort((ushort)newX);
+            _bitBuffer.AddUShort((ushort)newY);
             _bitBuffer.ToArray(_buffer);
             _webClient.Send(new ArraySegment<byte>(_buffer, 0, 2));
         }
@@ -328,6 +325,14 @@ public class Client : MonoBehaviour
 
     private void EnterSearchMode()
     {
+        // Move the moved items to their new positions
+        MoveableReferencer moveableReferencer = GetComponent<MoveableReferencer>();
+        foreach (var movedItem in _movedItems)
+        {
+            GridItem gridItem = moveableReferencer.Moveables[movedItem.Key];
+            gridItem.Move(new Vector2(movedItem.Value.Item1, movedItem.Value.Item2));
+        }
+        
         Interacter interacter = GetComponent<Interacter>();
         interacter.enabled = true;
         interacter.PointChange = 0;
@@ -337,7 +342,7 @@ public class Client : MonoBehaviour
 
     public bool IsMyGuessCorrect(ushort guessId)
     {
-        return _movedItems.Contains(guessId);
+        return _movedItems.ContainsKey(guessId);
     }
 
     private void ExitSearchMode()

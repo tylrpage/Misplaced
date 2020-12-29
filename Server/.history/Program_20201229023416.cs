@@ -333,9 +333,7 @@ namespace Server
             else if (currentState == GameState.Search) {
                 _bitBuffer.AddUShort((ushort)_movedObjects.Count);
                 foreach (var movedObject in _movedObjects) {
-                    _bitBuffer.AddUShort(movedObject.Key);
-                    _bitBuffer.AddUShort(movedObject.Value.Item1);
-                    _bitBuffer.AddUShort(movedObject.Value.Item1);
+                    _bitBuffer.AddUShort(id);
                 }
             }
 

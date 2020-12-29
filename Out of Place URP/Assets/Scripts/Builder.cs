@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Builder : MonoBehaviour
 {
-    public static event Action<ushort> ObjectMoved; 
+    public static event Action<ushort, int, int> ObjectMoved; 
     
     private Camera _mainCamera;
     private Vector3 _mousePos;
@@ -106,7 +106,7 @@ public class Builder : MonoBehaviour
                         _highlightedItem.InitialX = _highlightedItem.X;
                         _highlightedItem.InitialY = _highlightedItem.Y;
                         
-                        ObjectMoved?.Invoke(_highlightedItem.Id);
+                        ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);
                     }
                     
                     // Either way, drop it

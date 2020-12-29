@@ -112,7 +112,7 @@ namespace Server
                         beginTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
 
-                            _movedObjects = new Dictionary<ushort, Tuple<ushort, ushort>>();
+                            _movedObjects = new HashSet<ushort>();
                             _currentState = GameState.Builder;
                             SendStateUpdate(_currentState);
                         };
@@ -257,9 +257,7 @@ namespace Server
                 case 10:
                 {
                     ushort objectId = _bitBuffer.ReadUShort();
-                    ushort newX = _bitBuffer.ReadUShort();
-                    ushort newY = _bitBuffer.ReadUShort();
-                    _movedObjects[objectId] = new Tuple<ushort, ushort>(newX, newY);
+                    _movedObjects.Add(objectId);
 
                     break;
                 }
@@ -329,13 +327,11 @@ namespace Server
                 _builderId = _connectedIds[randomIndex];
                 _bitBuffer.AddUShort((ushort)_builderId);
             }
-            // Tell everyone the moved items
+            // Tell everyone the moved item ids
             else if (currentState == GameState.Search) {
                 _bitBuffer.AddUShort((ushort)_movedObjects.Count);
-                foreach (var movedObject in _movedObjects) {
-                    _bitBuffer.AddUShort(movedObject.Key);
-                    _bitBuffer.AddUShort(movedObject.Value.Item1);
-                    _bitBuffer.AddUShort(movedObject.Value.Item1);
+                foreach (ushort id in _movedObjects) {
+                    _bitBuffer.AddUShort(id);
                 }
             }
 
