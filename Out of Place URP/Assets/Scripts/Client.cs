@@ -20,6 +20,7 @@ public class Client : MonoBehaviour
     private BitBuffer _bitBuffer = new BitBuffer(1024);
     private byte[] _buffer = new byte[1024];
     private Dictionary<ushort, PositionInterp> _otherPlayers = new Dictionary<ushort, PositionInterp>();
+    private Dictionary<ushort, string> _names = new Dictionary<ushort, string>();
     private ushort _myId;
     private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
@@ -58,6 +59,15 @@ public class Client : MonoBehaviour
             {
                 _myId = _bitBuffer.ReadUShort();
                 _currentState = (GameState)_bitBuffer.ReadByte();
+                // Read all the ids and names it gives me and store it into _names to be used when players get spawned
+                ushort count = _bitBuffer.ReadUShort();
+                for (int i = 0; i < count; i++)
+                {
+                    ushort id = _bitBuffer.ReadUShort();
+                    string name = _bitBuffer.ReadString();
+                    _names[id] = name;
+                }
+                
                 HandleStateChange(_currentState);
                 _handShakeComplete = true;
                 break;
@@ -90,6 +100,7 @@ public class Client : MonoBehaviour
                         PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
                         positionInterp.enabled = true;
                         _otherPlayers[id] = positionInterp;
+                        newPlayer.GetComponent<Nametag>().SetText(_names[id]);
                     }
                     // Update the other players position
                     _otherPlayers[id].PushNewPosition(position);
@@ -118,7 +129,7 @@ public class Client : MonoBehaviour
             {
                 ushort id = _bitBuffer.ReadUShort();
                 string name = _bitBuffer.ReadString();
-                _otherPlayers[id].GetComponent<Nametag>().SetText(name);
+                _names[id] = name;
 
                 break;
             }

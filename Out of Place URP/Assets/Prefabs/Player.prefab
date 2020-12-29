@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5304667544211884006}
   - component: {fileID: 4950744819244578288}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: Nametag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -313,7 +313,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2654a7e423750ea4fa0a74821357bab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NameText: {fileID: 0}
+  NameText: {fileID: 4950744819244578288}
+  NametagTransform: {fileID: 7586593574223871493}
 --- !u!1 &2583301346585053627
 GameObject:
   m_ObjectHideFlags: 0

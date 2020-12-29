@@ -217,15 +217,14 @@ namespace Server
             _bitBuffer.AddUShort((ushort)id);
             _bitBuffer.AddByte((byte)_currentState);
 
-            _bitBuffer.AddUShort((ushort)_playerDatas.Count);
+            _bitBuffer.AddUShort((ushort)_playerDatas.Count)
             foreach (var playerData in _playerDatas.Values)
             {
-                _bitBuffer.AddUShort(playerData.id);
-                _bitBuffer.AddString(playerData.name);
+                
             }
 
             _bitBuffer.ToArray(_buffer);
-            _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 5 + _playerDatas.Count * 20));
+            _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 3));
         }
 
         static void WebServerOnData(int id, ArraySegment<byte> data) {

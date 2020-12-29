@@ -3134,24 +3134,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!224 &1527867063 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 7586593574223871493, guid: a3082ff9e360b1d438313a859f967898,
-    type: 3}
-  m_PrefabInstance: {fileID: 2583301346804449739}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1527867064 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4950744819244578288, guid: a3082ff9e360b1d438313a859f967898,
-    type: 3}
-  m_PrefabInstance: {fileID: 2583301346804449739}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1539941446
 GameObject:
   m_ObjectHideFlags: 0
@@ -3951,11 +3933,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1676820936931322410, guid: a3082ff9e360b1d438313a859f967898,
-        type: 3}
-      propertyPath: m_Name
-      value: Nametag
-      objectReference: {fileID: 0}
     - target: {fileID: 2583301345423605968, guid: a3082ff9e360b1d438313a859f967898,
         type: 3}
       propertyPath: m_Name
@@ -4014,21 +3991,6 @@ PrefabInstance:
     - target: {fileID: 2583301345423605972, guid: a3082ff9e360b1d438313a859f967898,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3574289083436812763, guid: a3082ff9e360b1d438313a859f967898,
-        type: 3}
-      propertyPath: NametagTransform
-      value: 
-      objectReference: {fileID: 1527867063}
-    - target: {fileID: 3574289083436812763, guid: a3082ff9e360b1d438313a859f967898,
-        type: 3}
-      propertyPath: NameText
-      value: 
-      objectReference: {fileID: 1527867064}
-    - target: {fileID: 4950744819244578288, guid: a3082ff9e360b1d438313a859f967898,
-        type: 3}
-      propertyPath: m_characterSpacing
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

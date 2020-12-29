@@ -220,7 +220,6 @@ namespace Server
             _bitBuffer.AddUShort((ushort)_playerDatas.Count);
             foreach (var playerData in _playerDatas.Values)
             {
-                _bitBuffer.AddUShort(playerData.id);
                 _bitBuffer.AddString(playerData.name);
             }
 
