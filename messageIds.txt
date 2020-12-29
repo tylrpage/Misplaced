@@ -1,4 +1,6 @@
 1: Message from client telling the server its position
-2: Message from server telling new client its id
+2: Message from server telling new client its id and current gameState
 3: Message from server telling clients updated positions of other players
 4: Message from server telling clients about disconnected client
+5: Message from server telling clients new game state
+6: Message from server telling a client he is the builder next round

@@ -18,6 +18,7 @@ public class Client : MonoBehaviour
     private ushort _myId;
     private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
+    private GameState _currentState;
 
     private void Awake()
     {
@@ -41,12 +42,14 @@ public class Client : MonoBehaviour
         _bitBuffer.Clear();
         _bitBuffer.FromArray(data.Array, data.Count);
         byte messageId = _bitBuffer.ReadByte();
+        byte currentState = _bitBuffer.ReadByte();
 
         switch (messageId)
         {
             case 2:
             {
                 _myId = _bitBuffer.ReadUShort();
+                _currentState = (GameState)_bitBuffer.ReadByte();
                 _handShakeComplete = true;
                 break;
             }
@@ -93,6 +96,35 @@ public class Client : MonoBehaviour
                     _otherPlayers.Remove(id);
                 }
 
+                break;
+            }
+            case 5:
+            {
+                _currentState = (GameState)_bitBuffer.ReadByte();
+                switch (_currentState)
+                {
+                    case GameState.Waiting:
+                    {
+                        Debug.Log("New state: Waiting");
+                        break;
+                    }
+                    case GameState.Begin:
+                    {
+                        Debug.Log("New state: Begin");
+                        break;
+                    }
+                    case GameState.Builder:
+                    {
+                        Debug.Log("New state: Builder");
+                        break;
+                    }
+                    case GameState.Search:
+                    {
+                        Debug.Log("New state: Search");
+                        break;
+                    }
+                }
+                
                 break;
             }
         }

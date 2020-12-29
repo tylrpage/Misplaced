@@ -12,7 +12,7 @@ Game State
 - Builder mode
  - Builder can move 3 objects then sends complete message to server containing changes
  - Players wait in waiting room
- - server: after 20 seconds or when complete message is receive: enter search state
+ - server: after 20 seconds or when complete message is received: enter search state
 
 - Search State
  - Builder: Views room from builder mode

@@ -35,7 +35,6 @@ namespace Server
     class Program
     {
         public static readonly float SECONDS_WAITING_IN_BEGIN = 3f;
-        public static readonly float SECONDS_WAITING_IN_BUILD = 20f;
 
         private static SimpleWebServer _webServer;
         private static List<int> _connectedIds = new List<int>();
@@ -47,8 +46,6 @@ namespace Server
 
         enum GameState {Waiting = 0, Begin, Builder, Search, Scoring}
         private static GameState _currentState = GameState.Waiting;
-        private static List<ushort> _movedObjects;
-        private static bool _waitingOnStateTimer = false;
 
         private static Random _rand;
 
@@ -76,8 +73,6 @@ namespace Server
             while (!Console.KeyAvailable) {
                 _webServer.ProcessMessageQueue();
 
-                // GUARD, DONT DO STATE STUFF IF WE ARE WAITING
-                if (_waitingOnStateTimer) continue;
                 switch(_currentState) {
                     case GameState.Waiting:
                     {
@@ -90,29 +85,7 @@ namespace Server
                     }
                     case GameState.Begin:
                     {
-                        // Set timer to go to builder state
                         Timer beginTimer = new Timer(SECONDS_WAITING_IN_BEGIN * 1000);
-                        _waitingOnStateTimer = true;
-                        beginTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            _movedObjects = new List<ushort>();
-                            _currentState = GameState.Builder;
-                            SendStateUpdate(_currentState);
-                        };
-                        break;
-                    }
-                    case GameState.Builder:
-                    {
-                        // Set timer to go to builder state
-                        Timer buildTimer = new Timer(SECONDS_WAITING_IN_BUILD * 1000);
-                        _waitingOnStateTimer = true;
-                        buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            _currentState = GameState.Search;
-                            SendStateUpdate(_currentState);
-                        };
                         break;
                     }
                 }
@@ -128,11 +101,10 @@ namespace Server
                 id = (ushort)id
             };
 
-            // Tell new client their id and the game state
+            // Tell new client their id
             _bitBuffer.Clear();
             _bitBuffer.AddByte(2);
             _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.AddByte((byte)_currentState);
             _bitBuffer.ToArray(_buffer);
             _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 3));
         }
@@ -189,21 +161,22 @@ namespace Server
         }
 
         private static void SendStateUpdate(GameState currentState) {
-            Console.WriteLine("Changing state to: " + currentState.ToString());
-
             _bitBuffer.Clear();
             _bitBuffer.AddByte(5);
             _bitBuffer.AddByte((byte)currentState);
 
-            // Chose a random builder and tell everyone
-            if (currentState == GameState.Begin) {
+            switch(currentState) {
+                case GameState.Begin: {
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
                     int nextBuilderId = _connectedIds[randomIndex];
                     _bitBuffer.AddUShort((ushort)nextBuilderId);
-            }
 
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 4));
+                    _bitBuffer.ToArray(_buffer);
+                    _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 4));
+                
+                    break;
+                }
+            }
         }
     }
 }

@@ -109,7 +109,7 @@ namespace Server
                         _waitingOnStateTimer = true;
                         buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
-
+                            
                             _currentState = GameState.Search;
                             SendStateUpdate(_currentState);
                         };
@@ -189,8 +189,6 @@ namespace Server
         }
 
         private static void SendStateUpdate(GameState currentState) {
-            Console.WriteLine("Changing state to: " + currentState.ToString());
-
             _bitBuffer.Clear();
             _bitBuffer.AddByte(5);
             _bitBuffer.AddByte((byte)currentState);

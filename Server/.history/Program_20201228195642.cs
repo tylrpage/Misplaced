@@ -189,7 +189,7 @@ namespace Server
         }
 
         private static void SendStateUpdate(GameState currentState) {
-            Console.WriteLine("Changing state to: " + currentState.ToString());
+            Console.WriteLine("Changing state to: " + currentState);
 
             _bitBuffer.Clear();
             _bitBuffer.AddByte(5);
