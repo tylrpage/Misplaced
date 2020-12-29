@@ -109,7 +109,6 @@ namespace Server
                     {
                         // Set timer to go to builder state
                         Timer buildTimer = new Timer(SECONDS_WAITING_IN_BUILD * 1000);
-                        buildTimer.AutoReset = false;
                         buildTimer.Start();
                         _waitingOnStateTimer = true;
 
