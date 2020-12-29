@@ -25,6 +25,7 @@ public class MoveableReferencer : MonoBehaviour
         foreach (var moveableObject in Moveables.Values)
         {
             moveableObject.HardResetPosition();
+            moveableObject.Picked = false;
         }
 
         foreach (var renderers in MoveablesRenderers.Values)
