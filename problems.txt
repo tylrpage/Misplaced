@@ -1,0 +1,5 @@
+Problems:
+
+- Server recognizes player count based on people who have connected not shaken hands
+  - When the server is extremely slow, this can cause it to fail, goes to builder mode and nobody
+    is builder

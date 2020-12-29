@@ -95,7 +95,7 @@ namespace Server
                 switch(_currentState) {
                     case GameState.Waiting:
                     {
-                        if (_handshakenClientCount >= 2) {
+                        if (_connectedIds.Count >= 2) {
                             _currentState = GameState.Begin;
                             SendStateUpdate(_currentState);
                         }
@@ -179,7 +179,7 @@ namespace Server
                             _bitBuffer.ToArray(_buffer);
                             _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 4 * _playerDatas.Count));
 
-                            if (_handshakenClientCount >= 2) {
+                            if (_connectedIds.Count >= 2) {
                                 _currentState = GameState.Begin;
                             }
                             else {
