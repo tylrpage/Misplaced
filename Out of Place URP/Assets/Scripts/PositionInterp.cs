@@ -19,7 +19,6 @@ public class PositionInterp : MonoBehaviour
     private void Update()
     {
         _t += Time.deltaTime * Constants.SERVER_TICKRATE;
-        Debug.Log(_t);
         transform.position = Vector3.Lerp(_previousPosition, _nextPosition, _t);
     }
 

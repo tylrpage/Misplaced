@@ -94,7 +94,6 @@ namespace Server
                         Timer beginTimer = new Timer(SECONDS_WAITING_IN_BEGIN * 1000);
                         beginTimer.Start();
                         _waitingOnStateTimer = true;
-                        
                         beginTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
 
@@ -108,9 +107,7 @@ namespace Server
                     {
                         // Set timer to go to builder state
                         Timer buildTimer = new Timer(SECONDS_WAITING_IN_BUILD * 1000);
-                        buildTimer.Start();
                         _waitingOnStateTimer = true;
-
                         buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
 

@@ -42,8 +42,7 @@ public class Client : MonoBehaviour
         _bitBuffer.Clear();
         _bitBuffer.FromArray(data.Array, data.Count);
         byte messageId = _bitBuffer.ReadByte();
-        byte currentState = _bitBuffer.ReadByte();
-
+        
         switch (messageId)
         {
             case 2:
@@ -70,12 +69,12 @@ public class Client : MonoBehaviour
                         continue;
                     
                     QuantizedVector2 qPosition = new QuantizedVector2(qX, qY);
-                    Vector2 positon = BoundedRange.Dequantize(qPosition, Constants.WORLD_BOUNDS);
+                    Vector2 position = BoundedRange.Dequantize(qPosition, Constants.WORLD_BOUNDS);
 
                     if (!_otherPlayers.ContainsKey(id))
                     {
                         // Create new player
-                        GameObject newPlayer = Instantiate(OtherPlayerPrefab, positon, Quaternion.identity);
+                        GameObject newPlayer = Instantiate(OtherPlayerPrefab, position, Quaternion.identity);
                         Destroy(newPlayer.GetComponent<Rigidbody2D>());
                         Destroy(newPlayer.GetComponent<PlayerController>());
                         PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
@@ -83,7 +82,7 @@ public class Client : MonoBehaviour
                         _otherPlayers[id] = positionInterp;
                     }
                     // Update the other players position
-                    _otherPlayers[id].PushNewPosition(positon);
+                    _otherPlayers[id].PushNewPosition(position);
                 }
                 break;
             }
