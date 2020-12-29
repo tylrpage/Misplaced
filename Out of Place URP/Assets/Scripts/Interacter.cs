@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Interacter : MonoBehaviour
 {
     [SerializeField] private Transform LocalPlayerTransform;
+    [SerializeField] private TMP_Text StatusText;
     public float MaxInteractRange;
     
     private SpriteRenderer _renderer;
@@ -19,13 +21,21 @@ public class Interacter : MonoBehaviour
     private Client _client;
     private GrabbyHandBehavior _grabbyHand;
 
-    public int PointChange;
+    public int CorrectItems;
+    public int WrongItems;
 
     void Awake()
     {
         _client = GetComponent<Client>();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
         _mainCamera = Camera.main;
+    }
+
+    public void Reset()
+    {
+        CorrectItems = 0;
+        WrongItems = 0;
+        UpdateStatusText();
     }
 
     private void Update()
@@ -96,13 +106,22 @@ public class Interacter : MonoBehaviour
             if (_client.IsMyGuessCorrect(_highlightedItem.Id))
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.green);
-                PointChange += 1;
+                CorrectItems += 1;
             }
             else
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.red);
-                PointChange -= 1;
+                WrongItems += 1;
             }
+            
+            UpdateStatusText();
         }
+    }
+
+    // Searching status text
+    private void UpdateStatusText()
+    {
+        StatusText.enabled = true;
+        StatusText.text = "Found " + CorrectItems + "/" + _client.MovedItems.Count;
     }
 }

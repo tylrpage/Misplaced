@@ -32,7 +32,8 @@ public class Client : MonoBehaviour
     private float _timeToSendNextUpdate = 0;
     private GameState _currentState;
     private ushort _builderId;
-    private Dictionary<ushort, Tuple<int, int>> _movedItems;
+    
+    public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
     private void Awake()
     {
@@ -112,7 +113,7 @@ public class Client : MonoBehaviour
                         PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
                         positionInterp.enabled = true;
                         _otherPlayers[id] = positionInterp;
-                        newPlayer.GetComponent<Nametag>().SetText(_names[id]);
+                        newPlayer.GetComponent<Nametag>().SetName(_names[id]);
                     }
                     // Update the other players position
                     _otherPlayers[id].PushNewPosition(position);
@@ -145,6 +146,8 @@ public class Client : MonoBehaviour
                     ushort id = _bitBuffer.ReadUShort();
                     short points = _bitBuffer.ReadShort();
                     _points[id] = points;
+                    
+                    _otherPlayers[id].GetComponent<Nametag>().SetPts(points);
                 }
 
                 break;
@@ -168,7 +171,7 @@ public class Client : MonoBehaviour
         ConnectUIController.HideConnectScreen();
         
         // Setup your own nametag
-        LocalPlayerTransform.GetComponent<Nametag>().SetText(ConnectUIController.DisplayName);
+        LocalPlayerTransform.GetComponent<Nametag>().SetName(ConnectUIController.DisplayName);
         
         // Send server your name and potentially some character customization stuff
         _bitBuffer.Clear();
@@ -212,6 +215,8 @@ public class Client : MonoBehaviour
             {
                 // Teleport to waiting room
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
+                StatusText.enabled = true;
+                StatusText.text = "Waiting for at least two players";
                 Debug.Log("New state: Waiting");
                 break;
             }
@@ -244,19 +249,16 @@ public class Client : MonoBehaviour
             }
             case GameState.Search:
             {
-                _movedItems = new Dictionary<ushort, Tuple<int, int>>();
+                MovedItems = new Dictionary<ushort, Tuple<int, int>>();
                 int count = _bitBuffer.ReadUShort();
                 for (int i = 0; i < count; i++)
                 {
                     ushort objectId = _bitBuffer.ReadUShort();
                     ushort newX = _bitBuffer.ReadUShort();
                     ushort newY = _bitBuffer.ReadUShort();
-                    _movedItems[objectId] = new Tuple<int, int>(newX, newY);
+                    MovedItems[objectId] = new Tuple<int, int>(newX, newY);
                 }
-                
-                // Searching status text
-                
-                
+
                 // If we are not builder, enter searching mode
                 if (_myId == _builderId)
                 {
@@ -287,7 +289,7 @@ public class Client : MonoBehaviour
 
     private void EnterBuildingMode()
     {
-        _movedItems = new Dictionary<ushort, Tuple<int, int>>();
+        MovedItems = new Dictionary<ushort, Tuple<int, int>>();
         GetComponent<Builder>().enabled = true;
         EnteringBuildingMode?.Invoke();
         LocalPlayerTransform.position = MainRoomLocation.position;
@@ -298,15 +300,16 @@ public class Client : MonoBehaviour
     {
         GetComponent<Builder>().enabled = false;
         ExitingBuildingMode?.Invoke();
-        StatusText.enabled = false;
+        StatusText.enabled = true;
+        StatusText.text = "Waiting for other players to spot the difference";
     }
     
     private void BuilderOnObjectMoved(ushort objectId, int newX, int newY)
     {
         // If we haven't moved this object before
-        if (!_movedItems.ContainsKey(objectId))
+        if (!MovedItems.ContainsKey(objectId))
         {
-            _movedItems[objectId] = new Tuple<int, int>(newX, newY);
+            MovedItems[objectId] = new Tuple<int, int>(newX, newY);
             UpdateBuilderStatusText();
 
             // Tell server we moved an object
@@ -323,14 +326,14 @@ public class Client : MonoBehaviour
     private void UpdateBuilderStatusText()
     {
         StatusText.enabled = true;
-        StatusText.text = "Objects moved: " + _movedItems.Count + "/" + Constants.MAX_SHIFTED_OBJECTS;
+        StatusText.text = "Objects moved: " + MovedItems.Count + "/" + Constants.MAX_SHIFTED_OBJECTS;
     }
 
     private void EnterSearchMode()
     {
         // Move the moved items to their new positions
         MoveableReferencer moveableReferencer = GetComponent<MoveableReferencer>();
-        foreach (var movedItem in _movedItems)
+        foreach (var movedItem in MovedItems)
         {
             GridItem gridItem = moveableReferencer.Moveables[movedItem.Key];
             gridItem.MoveToGridPos((ushort)movedItem.Value.Item1, (ushort)movedItem.Value.Item2);
@@ -338,14 +341,14 @@ public class Client : MonoBehaviour
         
         Interacter interacter = GetComponent<Interacter>();
         interacter.enabled = true;
-        interacter.PointChange = 0;
+        interacter.Reset();
         
         LocalPlayerTransform.position = MainRoomLocation.position;
     }
 
     public bool IsMyGuessCorrect(ushort guessId)
     {
-        return _movedItems.ContainsKey(guessId);
+        return MovedItems.ContainsKey(guessId);
     }
 
     private void ExitSearchMode()
@@ -353,7 +356,7 @@ public class Client : MonoBehaviour
         Interacter interacter = GetComponent<Interacter>();
         
         // Tell server your points change
-        int pointChange = interacter.PointChange;
+        int pointChange = interacter.CorrectItems - interacter.WrongItems;
         _bitBuffer.Clear();
         _bitBuffer.AddByte(11);
         _bitBuffer.AddShort((short) pointChange);
