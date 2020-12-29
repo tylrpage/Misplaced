@@ -336,12 +336,6 @@ namespace Server
                 bool foundValidBuilder = false;
                 ushort attempts = 0;
                 while (!foundValidBuilder) {
-                    if (attempts >= 5) {
-                        _currentState = GameState.Waiting;
-                        SendStateUpdate(_currentState);
-                        Console.WriteLine("Begin error occuring, going back to waiting");
-                    }
-
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
                     if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
                         _builderId = _connectedIds[randomIndex];

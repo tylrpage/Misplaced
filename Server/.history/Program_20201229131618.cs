@@ -339,7 +339,6 @@ namespace Server
                     if (attempts >= 5) {
                         _currentState = GameState.Waiting;
                         SendStateUpdate(_currentState);
-                        Console.WriteLine("Begin error occuring, going back to waiting");
                     }
 
                     int randomIndex = _rand.Next(0, _connectedIds.Count);

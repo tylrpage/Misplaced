@@ -334,21 +334,13 @@ namespace Server
             if (currentState == GameState.Begin) {
                 // Look for a builder who wasn't builder last round AND EXISTS
                 bool foundValidBuilder = false;
-                ushort attempts = 0;
                 while (!foundValidBuilder) {
-                    if (attempts >= 5) {
-                        _currentState = GameState.Waiting;
-                        SendStateUpdate(_currentState);
-                        Console.WriteLine("Begin error occuring, going back to waiting");
-                    }
-
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
                     if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
                         _builderId = _connectedIds[randomIndex];
                         foundValidBuilder = true;
                         _lastBuilderId = randomIndex;
                     }
-                    attempts += 1;
                 }
                 
                 _bitBuffer.AddUShort((ushort)_builderId);
