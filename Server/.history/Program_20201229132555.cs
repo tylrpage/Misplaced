@@ -33,7 +33,6 @@ namespace Server
         public PlayerData(PlayerData copy) {
             id = copy.id;
             name = copy.name;
-            handshaked = copy.handshaked
             qX = copy.qX;
             qY = copy.qY;
             points = copy.points;
@@ -353,15 +352,11 @@ namespace Server
                 //     attempts += 1;
                 // }
 
-                bool validBuilderFound = false;
-                while (!validBuilderFound) {
-                    int randomIndex = _rand.Next(0, _connectedIds.Count);
-                    int randomId = _connectedIds[randomIndex];
-                    if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
-                        validBuilderFound = true;
-                        _builderId = randomId;
-                        _lastBuilderId = randomId;
-                    }
+                int randomIndex = _rand.Next(0, _connectedIds.Count);
+                int randomId = _connectedIds[randomIndex];
+                if (_playerDatas[randomId].name)
+                if (_lastBuilderId == randomIndex) {
+                    randomIndex = (randomIndex + 1) % _connectedIds.Count;
                 }
                 
                 _bitBuffer.AddUShort((ushort)_builderId);

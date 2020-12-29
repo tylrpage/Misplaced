@@ -360,7 +360,6 @@ namespace Server
                     if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
                         validBuilderFound = true;
                         _builderId = randomId;
-                        _lastBuilderId = randomId;
                     }
                 }
                 

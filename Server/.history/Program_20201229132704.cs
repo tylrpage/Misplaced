@@ -354,14 +354,10 @@ namespace Server
                 // }
 
                 bool validBuilderFound = false;
-                while (!validBuilderFound) {
-                    int randomIndex = _rand.Next(0, _connectedIds.Count);
-                    int randomId = _connectedIds[randomIndex];
-                    if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
-                        validBuilderFound = true;
-                        _builderId = randomId;
-                        _lastBuilderId = randomId;
-                    }
+                int randomIndex = _rand.Next(0, _connectedIds.Count);
+                int randomId = _connectedIds[randomIndex];
+                if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
+                    validBuilderFound = true;
                 }
                 
                 _bitBuffer.AddUShort((ushort)_builderId);

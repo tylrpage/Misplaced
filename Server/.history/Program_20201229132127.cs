@@ -12,7 +12,7 @@ namespace Server
     public class PlayerData {
         public ushort id;
         public string name;
-        public bool handshaked;
+        public bool isNew;
         public uint qX;
         public uint qY;
         public short points;
@@ -21,8 +21,8 @@ namespace Server
         // Default ctor
         public PlayerData() {
             id = ushort.MaxValue;
-            name = "";
-            handshaked = false;
+            name = "null";
+            isNew = true;
             qX = uint.MaxValue;
             qY = uint.MaxValue;
             points = 0;
@@ -33,7 +33,6 @@ namespace Server
         public PlayerData(PlayerData copy) {
             id = copy.id;
             name = copy.name;
-            handshaked = copy.handshaked
             qX = copy.qX;
             qY = copy.qY;
             points = copy.points;
@@ -246,7 +245,6 @@ namespace Server
                 {
                     string name = _bitBuffer.ReadString();
                     _playerDatas[id].name = name;
-                    _playerDatas[id].handshaked = true;
 
                     _handshakenClientCount += 1;
 
@@ -335,33 +333,22 @@ namespace Server
             // Chose a random builder and tell everyone
             if (currentState == GameState.Begin) {
                 // Look for a builder who wasn't builder last round AND EXISTS
-                //bool foundValidBuilder = false;
-                //ushort attempts = 0;
-                // while (!foundValidBuilder) {
-                //     if (attempts >= 5) {
-                //         _currentState = GameState.Waiting;
-                //         SendStateUpdate(_currentState);
-                //         Console.WriteLine("Begin error occuring, going back to waiting");
-                //     }
-
-                //     int randomIndex = _rand.Next(1, _connectedIds.Count);
-                //     if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
-                //         _builderId = _connectedIds[randomIndex];
-                //         foundValidBuilder = true;
-                //         _lastBuilderId = randomIndex;
-                //     }
-                //     attempts += 1;
-                // }
-
-                bool validBuilderFound = false;
-                while (!validBuilderFound) {
-                    int randomIndex = _rand.Next(0, _connectedIds.Count);
-                    int randomId = _connectedIds[randomIndex];
-                    if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
-                        validBuilderFound = true;
-                        _builderId = randomId;
-                        _lastBuilderId = randomId;
+                bool foundValidBuilder = false;
+                ushort attempts = 0;
+                while (!foundValidBuilder) {
+                    if (attempts >= 5) {
+                        _currentState = GameState.Waiting;
+                        SendStateUpdate(_currentState);
+                        Console.WriteLine("Begin error occuring, going back to waiting");
                     }
+
+                    int randomIndex = _rand.Next(1, _connectedIds.Count);
+                    if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
+                        _builderId = _connectedIds[randomIndex];
+                        foundValidBuilder = true;
+                        _lastBuilderId = randomIndex;
+                    }
+                    attempts += 1;
                 }
                 
                 _bitBuffer.AddUShort((ushort)_builderId);

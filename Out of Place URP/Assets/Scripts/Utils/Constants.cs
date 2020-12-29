@@ -15,8 +15,8 @@ public static class Constants
     public static readonly float SECONDS_WAITING_IN_SCORING = 3f;
     
     // CLIENT
-    public static readonly int GRID_WIDTH = 13;
-    public static readonly int GRID_HEIGHT = 10;
+    public static readonly int GRID_WIDTH = 14;
+    public static readonly int GRID_HEIGHT = 11;
     public static readonly int GRID_UNITS = 1;
     public static readonly BoundedRange[] WORLD_BOUNDS = new BoundedRange[3]
     {
