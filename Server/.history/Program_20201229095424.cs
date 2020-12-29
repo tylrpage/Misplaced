@@ -295,7 +295,7 @@ namespace Server
             _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
 
             // Check if we have less than 2 players and should cancel the game
-            if (_currentState != GameState.Waiting && _handshakenClientCount < 2) {
+            if (_currentState != GameState.Waiting && _handshakenClientCount.Count < 2) {
                 beginTimer?.Stop();
                 buildTimer?.Stop();
                 searchTimer?.Stop();
