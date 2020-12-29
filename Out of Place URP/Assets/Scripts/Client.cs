@@ -15,6 +15,7 @@ public class Client : MonoBehaviour
     private byte[] _buffer = new byte[1024];
     private Dictionary<ushort, Transform> _otherPlayers = new Dictionary<ushort, Transform>();
     private ushort _myId;
+    private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
 
     private void Awake()
@@ -45,10 +46,14 @@ public class Client : MonoBehaviour
             case 2:
             {
                 _myId = _bitBuffer.ReadUShort();
+                _handShakeComplete = true;
                 break;
             }
             case 3:
             {
+                // GUARD FROM SETTING PLAYER POSITIONS UNTIL WE HAVE OUR ID
+                if (!_handShakeComplete) break;
+                
                 ushort count = _bitBuffer.ReadUShort();
                 for (int i = 0; i < count; i++)
                 {
@@ -65,6 +70,7 @@ public class Client : MonoBehaviour
 
                     if (!_otherPlayers.ContainsKey(id))
                     {
+                        Debug.Log("Create new player, id: " + id);
                         // Create new player
                         GameObject newPlayer = Instantiate(OtherPlayerPrefab, positon, Quaternion.identity);
                         Destroy(newPlayer.GetComponent<Rigidbody2D>());
