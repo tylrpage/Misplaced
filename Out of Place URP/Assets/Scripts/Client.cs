@@ -252,7 +252,6 @@ public class Client : MonoBehaviour
                     ushort newX = _bitBuffer.ReadUShort();
                     ushort newY = _bitBuffer.ReadUShort();
                     _movedItems[objectId] = new Tuple<int, int>(newX, newY);
-                    Debug.Log("New Item " + objectId + ", x: " + newX + ", y: " + newY);
                 }
                 
                 // If we are not builder, enter searching mode
@@ -306,9 +305,7 @@ public class Client : MonoBehaviour
         {
             _movedItems[objectId] = new Tuple<int, int>(newX, newY);
             UpdateBuilderStatusText();
-            
-            Debug.Log("Moved to" + newX + ", " + newY);
-            
+
             // Tell server we moved an object
             _bitBuffer.Clear();
             _bitBuffer.AddByte(10);
@@ -316,7 +313,7 @@ public class Client : MonoBehaviour
             _bitBuffer.AddUShort((ushort)newX);
             _bitBuffer.AddUShort((ushort)newY);
             _bitBuffer.ToArray(_buffer);
-            _webClient.Send(new ArraySegment<byte>(_buffer, 0, 2));
+            _webClient.Send(new ArraySegment<byte>(_buffer, 0, 13));
         }
     }
 

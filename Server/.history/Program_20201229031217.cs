@@ -259,6 +259,7 @@ namespace Server
                     ushort objectId = _bitBuffer.ReadUShort();
                     ushort newX = _bitBuffer.ReadUShort();
                     ushort newY = _bitBuffer.ReadUShort();
+                    Console.WriteLine($"Reading: X: {newX}, Y: {newY}");
                     _movedObjects[objectId] = new Tuple<ushort, ushort>(newX, newY);
 
                     break;
@@ -339,6 +340,8 @@ namespace Server
                     _bitBuffer.AddUShort(movedObject.Key);
                     _bitBuffer.AddUShort(movedObject.Value.Item1);
                     _bitBuffer.AddUShort(movedObject.Value.Item2);
+
+                    Console.WriteLine($"Moved object. ID: {movedObject.Key}, X: {movedObject.Value.Item1}, Y: {movedObject.Value.Item2}");
                 }
 
                 _bitBuffer.ToArray(_buffer);

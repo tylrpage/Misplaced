@@ -259,6 +259,7 @@ namespace Server
                     ushort objectId = _bitBuffer.ReadUShort();
                     ushort newX = _bitBuffer.ReadUShort();
                     ushort newY = _bitBuffer.ReadUShort();
+                    Console.WriteLine($"Reading: X: {newX}, Y: {newY}");
                     _movedObjects[objectId] = new Tuple<ushort, ushort>(newX, newY);
 
                     break;
