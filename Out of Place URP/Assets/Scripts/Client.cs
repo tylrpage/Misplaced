@@ -114,6 +114,14 @@ public class Client : MonoBehaviour
                 
                 break;
             }
+            case 9:
+            {
+                ushort id = _bitBuffer.ReadUShort();
+                string name = _bitBuffer.ReadString();
+                _otherPlayers[id].GetComponent<Nametag>().SetText(name);
+
+                break;
+            }
         }
     }
 
@@ -121,18 +129,25 @@ public class Client : MonoBehaviour
     {
         Debug.Log("Client connected");
         
+        // Hide the connect screen
+        ConnectUIController.HideConnectScreen();
+        
+        // Setup your own nametag
+        LocalPlayerTransform.GetComponent<Nametag>().SetText(ConnectUIController.DisplayName);
+        
         // Send server your name and potentially some character customization stuff
         _bitBuffer.Clear();
+        _bitBuffer.AddByte(8);
         _bitBuffer.AddString(ConnectUIController.DisplayName);
         _bitBuffer.ToArray(_buffer);
-        _webClient.Send(new ArraySegment<byte>(_buffer));
+        _webClient.Send(new ArraySegment<byte>(_buffer, 0, 22));
     }
 
     private void LateUpdate()
     {
         _webClient.ProcessMessageQueue(this);
-
-        if (Time.time >= _timeToSendNextUpdate)
+        
+        if (_webClient.ConnectionState == ClientState.Connected && Time.time >= _timeToSendNextUpdate)
         {
             _timeToSendNextUpdate = Time.time + (1f / Constants.CLIENT_TICKRATE);
             

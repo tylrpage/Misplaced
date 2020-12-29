@@ -250,7 +250,6 @@ namespace Server
                     _bitBuffer.AddUShort(_playerDatas[id].id);
                     _bitBuffer.AddString(_playerDatas[id].name);
                     _bitBuffer.ToArray(_buffer);
-                    _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 23));
 
                     break;
                 }

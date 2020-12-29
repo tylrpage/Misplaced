@@ -46,7 +46,7 @@ namespace Server
         public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
         public static readonly int NUMBER_OF_MOVEABLE_OBJECTS = 3;
 
-        private static Timer beginTimer, buildTimer, searchTimer;
+        private static Timer beginTimer, buildTimer;
 
         private static SimpleWebServer _webServer;
         private static List<int> _connectedIds = new List<int>();
@@ -140,7 +140,7 @@ namespace Server
                     case GameState.Search:
                     {
                         // Set timer to go to scoring state
-                        searchTimer = new Timer(SECONDS_WAITING_IN_SEARCH * 1000);
+                        Timer searchTimer = new Timer(SECONDS_WAITING_IN_SEARCH * 1000);
                         searchTimer.AutoReset = false;
                         searchTimer.Start();
                         _waitingOnStateTimer = true;
@@ -242,15 +242,9 @@ namespace Server
                 }
                 case 8:
                 {
+                    Console.WriteLine("Size: " + data.Count);
                     string name = _bitBuffer.ReadString();
                     _playerDatas[id].name = name;
-
-                    _bitBuffer.Clear();
-                    _bitBuffer.AddByte(9);
-                    _bitBuffer.AddUShort(_playerDatas[id].id);
-                    _bitBuffer.AddString(_playerDatas[id].name);
-                    _bitBuffer.ToArray(_buffer);
-                    _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 23));
 
                     break;
                 }
@@ -271,8 +265,6 @@ namespace Server
             // Check if we have less than 2 players and should cancel the game
             if (_currentState != GameState.Waiting && _connectedIds.Count < 2) {
                 beginTimer?.Stop();
-                buildTimer?.Stop();
-                searchTimer?.Stop();
                 _currentState = GameState.Waiting;
                 SendStateUpdate(_currentState);
             }

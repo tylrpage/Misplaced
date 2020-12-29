@@ -9,12 +9,13 @@ public class ConnectUIController : MonoBehaviour
 {
     [SerializeField] private TMP_InputField NameInput;
     [SerializeField] private Button ConnectButton;
+    [SerializeField] private GameObject ConnectScreenGroup;
     
     public string DisplayName { get; private set; }
 
     public void OnNameInputChanged(string newName)
     {
-        Regex rg = new Regex(@"^[a-zA-Z0-9]*$");
+        Regex rg = new Regex(@"^[a-zA-Z0-9]{2,20}$");
         if (rg.IsMatch(newName))
         {
             DisplayName = newName;
@@ -24,5 +25,10 @@ public class ConnectUIController : MonoBehaviour
         {
             ConnectButton.interactable = false;
         }
+    }
+
+    public void HideConnectScreen()
+    {
+        ConnectScreenGroup.SetActive(false);
     }
 }
