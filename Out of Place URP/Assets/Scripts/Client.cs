@@ -8,12 +8,13 @@ using NetStack.Serialization;
 
 public class Client : MonoBehaviour
 {
-    public GameObject OtherPlayerPrefab;
+    [SerializeField] private Transform LocalPlayerTransform;
+    [SerializeField] private GameObject OtherPlayerPrefab;
     
     private SimpleWebClient _webClient;
     private BitBuffer _bitBuffer = new BitBuffer(1024);
     private byte[] _buffer = new byte[1024];
-    private Dictionary<ushort, Transform> _otherPlayers = new Dictionary<ushort, Transform>();
+    private Dictionary<ushort, PositionInterp> _otherPlayers = new Dictionary<ushort, PositionInterp>();
     private ushort _myId;
     private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
@@ -70,15 +71,16 @@ public class Client : MonoBehaviour
 
                     if (!_otherPlayers.ContainsKey(id))
                     {
-                        Debug.Log("Create new player, id: " + id);
                         // Create new player
                         GameObject newPlayer = Instantiate(OtherPlayerPrefab, positon, Quaternion.identity);
                         Destroy(newPlayer.GetComponent<Rigidbody2D>());
                         Destroy(newPlayer.GetComponent<PlayerController>());
-                        _otherPlayers[id] = newPlayer.transform;
+                        PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
+                        positionInterp.enabled = true;
+                        _otherPlayers[id] = positionInterp;
                     }
                     // Update the other players position
-                    _otherPlayers[id].position = positon;
+                    _otherPlayers[id].PushNewPosition(positon);
                 }
                 break;
             }
@@ -113,12 +115,17 @@ public class Client : MonoBehaviour
             _bitBuffer.Clear();
             _bitBuffer.AddByte(1);
 
-            QuantizedVector3 qPosition = BoundedRange.Quantize(transform.position, Constants.WORLD_BOUNDS);
+            QuantizedVector3 qPosition = BoundedRange.Quantize(LocalPlayerTransform.position, Constants.WORLD_BOUNDS);
             _bitBuffer.AddUInt(qPosition.x);
             _bitBuffer.AddUInt(qPosition.y);
 
             _bitBuffer.ToArray(_buffer);
             _webClient.Send(new ArraySegment<byte>(_buffer, 0, 9));
         }
+    }
+
+    private void OnDestroy()
+    {
+        _webClient.Disconnect();
     }
 }

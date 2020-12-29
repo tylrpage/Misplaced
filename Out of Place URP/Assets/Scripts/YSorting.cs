@@ -16,7 +16,7 @@ public class YSorting : MonoBehaviour
     void Update()
     {
         var position = _transform.position;
-        transform.position = new Vector3(position.x, position.y, position.y);
+        transform.position = new Vector3(position.x, position.y, position.y / 10f);
         //_position = new Vector3(_position.x, _position.y, _position.y);
     }
 }
