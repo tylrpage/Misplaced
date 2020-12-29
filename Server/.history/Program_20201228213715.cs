@@ -240,7 +240,6 @@ namespace Server
                 }
                 case 8:
                 {
-                    Console.WriteLine("Size: " + data.Count);
                     string name = _bitBuffer.ReadString();
                     _playerDatas[id].name = name;
 

@@ -5,14 +5,17 @@ using UnityEngine;
 using Mirror.SimpleWeb;
 using NetStack.Quantization;
 using NetStack.Serialization;
+using TMPro;
 using UnityEngine.SocialPlatforms;
+using UnityEngine.UI;
 
 public class Client : MonoBehaviour
 {
     [SerializeField] private Transform LocalPlayerTransform;
     [SerializeField] private GameObject OtherPlayerPrefab;
     [SerializeField] private Transform WaitingRoomLocation;
-    
+    [SerializeField] private ConnectUIController ConnectUIController;
+
     private SimpleWebClient _webClient;
     private BitBuffer _bitBuffer = new BitBuffer(1024);
     private byte[] _buffer = new byte[1024];
@@ -21,6 +24,7 @@ public class Client : MonoBehaviour
     private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
     private GameState _currentState;
+    private ushort _builderId;
 
     private void Awake()
     {
@@ -28,7 +32,10 @@ public class Client : MonoBehaviour
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
         _webClient.onConnect += WebClientOnonConnect;
         _webClient.onData += WebClientOnonData;
-        
+    }
+
+    public void Connect()
+    {
         // connect
         UriBuilder uriBuilder = new UriBuilder()
         {
@@ -113,6 +120,12 @@ public class Client : MonoBehaviour
     private void WebClientOnonConnect()
     {
         Debug.Log("Client connected");
+        
+        // Send server your name and potentially some character customization stuff
+        _bitBuffer.Clear();
+        _bitBuffer.AddString(ConnectUIController.DisplayName);
+        _bitBuffer.ToArray(_buffer);
+        _webClient.Send(new ArraySegment<byte>(_buffer));
     }
 
     private void LateUpdate()
@@ -155,6 +168,7 @@ public class Client : MonoBehaviour
             case GameState.Begin:
             {
                 // Tell people who the builder will be
+                _builderId = _bitBuffer.ReadUShort();
                 Debug.Log("New state: Begin");
                 break;
             }

@@ -21,7 +21,6 @@ namespace Server
         // Default ctor
         public PlayerData() {
             id = ushort.MaxValue;
-            name = "null";
             isNew = true;
             qX = uint.MaxValue;
             qY = uint.MaxValue;
@@ -32,7 +31,6 @@ namespace Server
         // Copy ctor
         public PlayerData(PlayerData copy) {
             id = copy.id;
-            name = copy.name;
             qX = copy.qX;
             qY = copy.qY;
             points = copy.points;
@@ -236,14 +234,6 @@ namespace Server
                     // Send this position to everyone next state packet
                     _dataToSend.Enqueue(playerData);
                     
-                    break;
-                }
-                case 8:
-                {
-                    Console.WriteLine("Size: " + data.Count);
-                    string name = _bitBuffer.ReadString();
-                    _playerDatas[id].name = name;
-
                     break;
                 }
             }
