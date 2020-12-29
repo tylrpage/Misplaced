@@ -304,7 +304,9 @@ public class Client : MonoBehaviour
     private void EnterBuildingMode()
     {
         MovedItems = new Dictionary<ushort, Tuple<int, int>>();
-        GetComponent<Builder>().enabled = true;
+        Builder builder = GetComponent<Builder>();
+        builder.enabled = true;
+        builder.Reset();
         EnteringBuildingMode?.Invoke();
         LocalPlayerTransform.position = MainRoomLocation.position;
         UpdateBuilderStatusText();

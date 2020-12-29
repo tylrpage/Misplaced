@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Builder : MonoBehaviour
@@ -18,6 +19,8 @@ public class Builder : MonoBehaviour
     private bool _movingItem;
     private bool _currentlyInValidPosition;
     private GrabbyHandBehavior _grabbyHand;
+    private ushort _numberOfMovedObjects = 0;
+    private HashSet<ushort> _movedObjects;
     
     // Start is called before the first frame update
     void Start()
@@ -26,6 +29,12 @@ public class Builder : MonoBehaviour
         
         _grid = PopulateBoolGrid();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
+    }
+
+    public void Reset()
+    {
+        _numberOfMovedObjects = 0;
+        _movedObjects = new HashSet<ushort>();
     }
 
     // Update is called once per frame
@@ -100,7 +109,7 @@ public class Builder : MonoBehaviour
                 if (_movingItem)
                 {
                     // Reset the object's position is placed in an invalid location
-                    if (!_currentlyInValidPosition)
+                    if (!_currentlyInValidPosition || OverMovingLimit())
                     {
                         _highlightedItem.ResetPosition();
                     }
@@ -114,6 +123,7 @@ public class Builder : MonoBehaviour
                         // _highlightedItem.InitialY = _highlightedItem.Y;
                         
                         _grabbyHand.OpenHand();
+                        _numberOfMovedObjects += 1;
 
                         ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);
                     }
@@ -196,5 +206,11 @@ public class Builder : MonoBehaviour
         }
 
         return grid;
+    }
+
+    // True when moving an object we haven't moved before and we moved max amount of objects
+    private bool OverMovingLimit()
+    {
+        return _numberOfMovedObjects >= Constants.MAX_SHIFTED_OBJECTS && !_movedObjects.Contains(_highlightedItem.Id);
     }
 }
