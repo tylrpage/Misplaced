@@ -29,6 +29,19 @@ public class Builder : MonoBehaviour
         
         _grid = PopulateBoolGrid();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
+        Client.ExitingBuildingMode += ClientOnExitingBuildingMode;
+    }
+
+    private void ClientOnExitingBuildingMode()
+    {
+        // Let go of what im holding
+        if (_highlightedItem != null)
+        {
+            _highlightedItem.ResetPosition();
+            SpriteRenderer renderer = _highlightedItem.GetComponent<SpriteRenderer>();
+            renderer.material.SetFloat("Vector1_5D8044E5", 0);
+        }
+        _grabbyHand.Pointer();
     }
 
     public void Reset()
@@ -119,10 +132,12 @@ public class Builder : MonoBehaviour
                         // so that it will reset to this spot next time and can update the grid
                         // correctly if moved again
                         UpdateGrid(_grid, _highlightedItem);
-                        // _highlightedItem.InitialX = _highlightedItem.X;
-                        // _highlightedItem.InitialY = _highlightedItem.Y;
+                        _highlightedItem.RoundX = _highlightedItem.X;
+                        _highlightedItem.RoundY = _highlightedItem.Y;
                         
                         _grabbyHand.OpenHand();
+
+                        _movedObjects.Add(_highlightedItem.Id);
                         _numberOfMovedObjects += 1;
 
                         ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);

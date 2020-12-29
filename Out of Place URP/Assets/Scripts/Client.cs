@@ -33,12 +33,14 @@ public class Client : MonoBehaviour
     private GameState _currentState;
     private ushort _builderId;
     private MoveableReferencer _moveableReferencer;
+    private TimerTextController _timerTextController;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
     private void Awake()
     {
         _moveableReferencer = GetComponent<MoveableReferencer>();
+        _timerTextController = GetComponent<TimerTextController>();
         
         TcpConfig tcpConfig = new TcpConfig(true, 5000, 20000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
@@ -228,6 +230,7 @@ public class Client : MonoBehaviour
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
                 StatusText.enabled = true;
                 StatusText.text = "Waiting for at least two players";
+                _timerTextController.HideTimer();
                 Debug.Log("New state: Waiting");
                 break;
             }
@@ -237,7 +240,8 @@ public class Client : MonoBehaviour
                 _builderId = _bitBuffer.ReadUShort();
                 string name = _names[_builderId];
                 StatusText.enabled = true;
-                StatusText.text = "Next Shifter:\n" + name;
+                StatusText.text = "Next Shifter: " + name;
+                _timerTextController.HideTimer();
                 Debug.Log("New state: Begin");
                 break;
             }
@@ -252,8 +256,10 @@ public class Client : MonoBehaviour
                 {
                     string name = _names[_builderId];
                     StatusText.enabled = true;
-                    StatusText.text = "Waiting for Shifter:\n" + name;
+                    StatusText.text = "Waiting for Shifter: " + name;
                 }
+                
+                _timerTextController.SetTimer("Shifting", Constants.SECONDS_WAITING_IN_BUILD);
                 
                 Debug.Log("New state: Builder");
                 break;
@@ -280,6 +286,8 @@ public class Client : MonoBehaviour
                     EnterSearchMode();
                 }
                 
+                _timerTextController.SetTimer("Searching", Constants.SECONDS_WAITING_IN_SEARCH);
+                
                 Debug.Log("New state: Search");
                 break;
             }
@@ -294,6 +302,10 @@ public class Client : MonoBehaviour
                 }
                 // Teleport to waiting room
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
+
+                StatusText.enabled = true;
+                StatusText.text = "Generating scores...";
+                _timerTextController.SetTimer("Scoring", Constants.SECONDS_WAITING_IN_SCORING);
                 
                 Debug.Log("New state: Scoring");
                 break;

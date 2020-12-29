@@ -332,14 +332,13 @@ namespace Server
 
             // Chose a random builder and tell everyone
             if (currentState == GameState.Begin) {
-                // Look for a builder who wasn't builder last round AND EXISTS
+                // Look for a builder who wasn't builder last round
                 bool foundValidBuilder = false;
                 while (!foundValidBuilder) {
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
                     if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
                         _builderId = _connectedIds[randomIndex];
                         foundValidBuilder = true;
-                        _lastBuilderId = randomIndex;
                     }
                 }
                 

@@ -24,7 +24,7 @@ public class MoveableReferencer : MonoBehaviour
     {
         foreach (var moveableObject in Moveables.Values)
         {
-            moveableObject.ResetPosition();
+            moveableObject.HardResetPosition();
         }
 
         foreach (var renderers in MoveablesRenderers.Values)

@@ -9,6 +9,10 @@ public static class Constants
     public static readonly ushort GAME_PORT = 9001;
     public static readonly ushort SERVER_TICKRATE = 25;
     public static readonly int MAX_SHIFTED_OBJECTS = 3;
+    public static readonly float SECONDS_WAITING_IN_BEGIN = 5f;
+    public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
+    public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
+    public static readonly float SECONDS_WAITING_IN_SCORING = 3f;
     
     // CLIENT
     public static readonly int GRID_WIDTH = 10;

@@ -63,7 +63,6 @@ namespace Server
         private static Dictionary<ushort, Tuple<ushort, ushort>> _movedObjects;
         private static bool _waitingOnStateTimer = false;
         private static int _builderId;
-        private static int _lastBuilderId = 0;
 
         private static Random _rand;
 
@@ -332,17 +331,10 @@ namespace Server
 
             // Chose a random builder and tell everyone
             if (currentState == GameState.Begin) {
-                // Look for a builder who wasn't builder last round AND EXISTS
                 bool foundValidBuilder = false;
-                while (!foundValidBuilder) {
-                    int randomIndex = _rand.Next(0, _connectedIds.Count);
-                    if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
-                        _builderId = _connectedIds[randomIndex];
-                        foundValidBuilder = true;
-                        _lastBuilderId = randomIndex;
-                    }
-                }
-                
+                while (build)
+                int randomIndex = _rand.Next(0, _connectedIds.Count);
+                _builderId = _connectedIds[randomIndex];
                 _bitBuffer.AddUShort((ushort)_builderId);
 
                 _bitBuffer.ToArray(_buffer);

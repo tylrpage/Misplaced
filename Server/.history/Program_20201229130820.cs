@@ -339,7 +339,6 @@ namespace Server
                     if (_lastBuilderId != randomIndex && _connectedIds.Contains(randomIndex)) {
                         _builderId = _connectedIds[randomIndex];
                         foundValidBuilder = true;
-                        _lastBuilderId = randomIndex;
                     }
                 }
                 

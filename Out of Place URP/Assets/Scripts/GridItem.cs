@@ -12,6 +12,8 @@ public class GridItem : MonoBehaviour
     // Position of lower left on grid
     public int InitialX;
     public int InitialY;
+    public int RoundX;
+    public int RoundY;
     
     public int X;
     public int Y;
@@ -21,6 +23,8 @@ public class GridItem : MonoBehaviour
     {
         X = InitialX;
         Y = InitialY;
+        RoundX = InitialX;
+        RoundY = InitialY;
         transform.position = new Vector3(GridXToWorldPos(X), GridYToWorldPos(Y), 0);
     }
 
@@ -40,9 +44,16 @@ public class GridItem : MonoBehaviour
 
     public void ResetPosition()
     {
+        X = RoundX;
+        Y = RoundY;
+        transform.position = new Vector3(GridXToWorldPos(X), GridYToWorldPos(Y), 0);
+    }
+    
+    public void HardResetPosition()
+    {
         X = InitialX;
         Y = InitialY;
-        transform.position = new Vector3(GridXToWorldPos(InitialX), GridYToWorldPos(InitialY), 0);
+        transform.position = new Vector3(GridXToWorldPos(X), GridYToWorldPos(Y), 0);
     }
 
     private int WorldXtoGridPos(float x)
