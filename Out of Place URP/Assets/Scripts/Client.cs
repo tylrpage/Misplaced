@@ -51,6 +51,7 @@ public class Client : MonoBehaviour
             {
                 _myId = _bitBuffer.ReadUShort();
                 _currentState = (GameState)_bitBuffer.ReadByte();
+                HandleStateChange(_currentState);
                 _handShakeComplete = true;
                 break;
             }
@@ -102,40 +103,7 @@ public class Client : MonoBehaviour
             case 5:
             {
                 _currentState = (GameState)_bitBuffer.ReadByte();
-                switch (_currentState)
-                {
-                    case GameState.Waiting:
-                    {
-                        // Teleport to waiting room
-                        LocalPlayerTransform.position = WaitingRoomLocation.position;
-                        Debug.Log("New state: Waiting");
-                        break;
-                    }
-                    case GameState.Begin:
-                    {
-                        // Tell people who the builder will be
-                        Debug.Log("New state: Begin");
-                        break;
-                    }
-                    case GameState.Builder:
-                    {
-                        // If we are builder, enter builder mode
-                        Debug.Log("New state: Builder");
-                        break;
-                    }
-                    case GameState.Search:
-                    {
-                        // If we are not builder, enter searching mode
-                        Debug.Log("New state: Search");
-                        break;
-                    }
-                    case GameState.Scoring:
-                    {
-                        // Nothing? Wait for scoring message
-                        Debug.Log("New state: Scoring");
-                        break;
-                    }
-                }
+                HandleStateChange(_currentState);
                 
                 break;
             }
@@ -171,5 +139,43 @@ public class Client : MonoBehaviour
     private void OnDestroy()
     {
         _webClient.Disconnect();
+    }
+
+    private void HandleStateChange(GameState gameState)
+    {
+        switch (gameState)
+        {
+            case GameState.Waiting:
+            {
+                // Teleport to waiting room
+                LocalPlayerTransform.position = WaitingRoomLocation.position;
+                Debug.Log("New state: Waiting");
+                break;
+            }
+            case GameState.Begin:
+            {
+                // Tell people who the builder will be
+                Debug.Log("New state: Begin");
+                break;
+            }
+            case GameState.Builder:
+            {
+                // If we are builder, enter builder mode
+                Debug.Log("New state: Builder");
+                break;
+            }
+            case GameState.Search:
+            {
+                // If we are not builder, enter searching mode
+                Debug.Log("New state: Search");
+                break;
+            }
+            case GameState.Scoring:
+            {
+                // Nothing? Wait for scoring message
+                Debug.Log("New state: Scoring");
+                break;
+            }
+        }
     }
 }
