@@ -5,11 +5,13 @@ using UnityEngine;
 using Mirror.SimpleWeb;
 using NetStack.Quantization;
 using NetStack.Serialization;
+using UnityEngine.SocialPlatforms;
 
 public class Client : MonoBehaviour
 {
     [SerializeField] private Transform LocalPlayerTransform;
     [SerializeField] private GameObject OtherPlayerPrefab;
+    [SerializeField] private Transform WaitingRoomLocation;
     
     private SimpleWebClient _webClient;
     private BitBuffer _bitBuffer = new BitBuffer(1024);
@@ -104,22 +106,33 @@ public class Client : MonoBehaviour
                 {
                     case GameState.Waiting:
                     {
+                        // Teleport to waiting room
+                        LocalPlayerTransform.position = WaitingRoomLocation.position;
                         Debug.Log("New state: Waiting");
                         break;
                     }
                     case GameState.Begin:
                     {
+                        // Tell people who the builder will be
                         Debug.Log("New state: Begin");
                         break;
                     }
                     case GameState.Builder:
                     {
+                        // If we are builder, enter builder mode
                         Debug.Log("New state: Builder");
                         break;
                     }
                     case GameState.Search:
                     {
+                        // If we are not builder, enter searching mode
                         Debug.Log("New state: Search");
+                        break;
+                    }
+                    case GameState.Scoring:
+                    {
+                        // Nothing? Wait for scoring message
+                        Debug.Log("New state: Scoring");
                         break;
                     }
                 }

@@ -251,8 +251,7 @@ namespace Server
 
             // Check if we have less than 2 players and should cancel the game
             if (_connectedIds.Count < 2) {
-                _currentState = GameState.Waiting;
-                SendStateUpdate(_currentState);
+                
             }
         }
 

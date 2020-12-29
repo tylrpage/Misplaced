@@ -4,3 +4,4 @@
 4: Message from server telling clients about disconnected client
 5: Message from server telling clients new game state
 6: Message from server telling a client he is the builder next round
+7: Message from server telling clients their new points

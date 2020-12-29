@@ -177,21 +177,7 @@ namespace Server
                         }
 
                         _playerDatas[_builderId].points += builderPoints;
-                        _bitBuffer.AddUShort((ushort)_builderId);
-                        _bitBuffer.AddShort(_playerDatas[_builderId].points);
 
-                        _bitBuffer.ToArray(_buffer);
-                        _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 2 * _playerDatas.Count));
-
-                        if (_connectedIds.Count >= 2) {
-                            _currentState = GameState.Begin;
-                        }
-                        else {
-                            _currentState = GameState.Waiting;
-                        }
-                        SendStateUpdate(_currentState);
-
-                        break;
                     }
                 }
             }
@@ -248,12 +234,6 @@ namespace Server
             _bitBuffer.AddUShort((ushort)id);
             _bitBuffer.ToArray(_buffer);
             _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
-
-            // Check if we have less than 2 players and should cancel the game
-            if (_connectedIds.Count < 2) {
-                _currentState = GameState.Waiting;
-                SendStateUpdate(_currentState);
-            }
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
@@ -274,7 +254,6 @@ namespace Server
 
         private static void SendStateUpdate(GameState currentState) {
             Console.WriteLine("Changing state to: " + currentState.ToString());
-            _waitingOnStateTimer = false;
 
             _bitBuffer.Clear();
             _bitBuffer.AddByte(5);

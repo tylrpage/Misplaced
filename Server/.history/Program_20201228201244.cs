@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using NetStack.Serialization;
 using NetStack.Quantization;
 using System.Timers;
-using System.Linq;
 
 namespace Server
 {
@@ -14,8 +13,7 @@ namespace Server
         public bool isNew;
         public uint qX;
         public uint qY;
-        public short points;
-        public List<ushort> guesses;
+        public ushort points;
 
         // Default ctor
         public PlayerData() {
@@ -24,7 +22,6 @@ namespace Server
             qX = uint.MaxValue;
             qY = uint.MaxValue;
             points = 0;
-            guesses = new List<ushort>();
         }
 
         // Copy ctor
@@ -33,7 +30,6 @@ namespace Server
             qX = copy.qX;
             qY = copy.qY;
             points = copy.points;
-            guesses = copy.guesses;
         }
     }
     class Program
@@ -41,7 +37,6 @@ namespace Server
         public static readonly float SECONDS_WAITING_IN_BEGIN = 3f;
         public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
         public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
-        public static readonly int NUMBER_OF_MOVEABLE_OBJECTS = 3;
 
         private static SimpleWebServer _webServer;
         private static List<int> _connectedIds = new List<int>();
@@ -55,7 +50,6 @@ namespace Server
         private static GameState _currentState = GameState.Waiting;
         private static List<ushort> _movedObjects;
         private static bool _waitingOnStateTimer = false;
-        private static int _builderId;
 
         private static Random _rand;
 
@@ -123,10 +117,6 @@ namespace Server
                         buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
 
-                            // Reset everyones guesses
-                            foreach (PlayerData playerData in _playerDatas.Values) {
-                                playerData.guesses.Clear();
-                            }
                             _currentState = GameState.Search;
                             SendStateUpdate(_currentState);
                         };
@@ -150,48 +140,7 @@ namespace Server
                     }
                     case GameState.Scoring:
                     {
-                        short builderPoints = 0;
-
-                        _bitBuffer.Clear();
-                        _bitBuffer.AddByte(7);
-                        _bitBuffer.AddUShort((ushort)_playerDatas.Count);
-
-
-                        foreach (var playerData in _playerDatas.Values) {
-                            // GUARD, DON'T SCORE THE BUILDER THIS WAY
-                            if (playerData.id == _builderId) continue;
-
-                            // Free points for objects builder couldnt move
-                            // A point for a correct guess, minus point for a wrong guess
-                            int numCorrect = _movedObjects.Distinct().Intersect(playerData.guesses).Count();
-                            int newPoints = (numCorrect * 2) - playerData.guesses.Count + (NUMBER_OF_MOVEABLE_OBJECTS - _movedObjects.Count);
-                            playerData.points += (short)newPoints;
-
-                            // Builder gets a point for each player who couldnt find any differences
-                            if (numCorrect == 0) {
-                                builderPoints += 1;
-                            }
-
-                            _bitBuffer.AddUShort(playerData.id);
-                            _bitBuffer.AddShort(playerData.points);
-                        }
-
-                        _playerDatas[_builderId].points += builderPoints;
-                        _bitBuffer.AddUShort((ushort)_builderId);
-                        _bitBuffer.AddShort(_playerDatas[_builderId].points);
-
-                        _bitBuffer.ToArray(_buffer);
-                        _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 2 * _playerDatas.Count));
-
-                        if (_connectedIds.Count >= 2) {
-                            _currentState = GameState.Begin;
-                        }
-                        else {
-                            _currentState = GameState.Waiting;
-                        }
-                        SendStateUpdate(_currentState);
-
-                        break;
+                        
                     }
                 }
             }
@@ -248,12 +197,6 @@ namespace Server
             _bitBuffer.AddUShort((ushort)id);
             _bitBuffer.ToArray(_buffer);
             _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
-
-            // Check if we have less than 2 players and should cancel the game
-            if (_connectedIds.Count < 2) {
-                _currentState = GameState.Waiting;
-                SendStateUpdate(_currentState);
-            }
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
@@ -274,7 +217,6 @@ namespace Server
 
         private static void SendStateUpdate(GameState currentState) {
             Console.WriteLine("Changing state to: " + currentState.ToString());
-            _waitingOnStateTimer = false;
 
             _bitBuffer.Clear();
             _bitBuffer.AddByte(5);
@@ -283,8 +225,8 @@ namespace Server
             // Chose a random builder and tell everyone
             if (currentState == GameState.Begin) {
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
-                    _builderId = _connectedIds[randomIndex];
-                    _bitBuffer.AddUShort((ushort)_builderId);
+                    int nextBuilderId = _connectedIds[randomIndex];
+                    _bitBuffer.AddUShort((ushort)nextBuilderId);
             }
 
             _bitBuffer.ToArray(_buffer);
