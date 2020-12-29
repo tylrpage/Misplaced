@@ -306,6 +306,8 @@ public class Client : MonoBehaviour
             _movedItems[objectId] = new Tuple<int, int>(newX, newY);
             UpdateBuilderStatusText();
             
+            Debug.Log("Moved to" + newX + ", " + newY);
+            
             // Tell server we moved an object
             _bitBuffer.Clear();
             _bitBuffer.AddByte(10);

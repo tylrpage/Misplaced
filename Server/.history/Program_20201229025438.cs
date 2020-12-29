@@ -344,10 +344,7 @@ namespace Server
                 _bitBuffer.ToArray(_buffer);
                 _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 6 + 12 * Constants.MAX_SHIFTED_OBJECTS));
             }
-            else {
-                _bitBuffer.ToArray(_buffer);
-                _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 2));
-            }
+
             
         }
     }
