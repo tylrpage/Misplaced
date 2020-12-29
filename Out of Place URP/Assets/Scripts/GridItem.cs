@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class GridItem : MonoBehaviour
 {
+    public ushort Id;
     // Size in grid units
     public int Width;
     public int Height;
@@ -14,6 +15,7 @@ public class GridItem : MonoBehaviour
     
     public int X;
     public int Y;
+    public bool Picked;
 
     private void Awake()
     {
@@ -38,7 +40,7 @@ public class GridItem : MonoBehaviour
 
     private int WorldXtoGridPos(float x)
     {
-        return (int) (x / Constants.GRID_UNITS - ((Constants.GRID_UNITS / 2f) / Width));
+        return (int) (x / Constants.GRID_UNITS);
     }
     
     private int WorldYtoGridPos(float y)

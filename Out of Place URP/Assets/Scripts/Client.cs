@@ -14,18 +14,32 @@ public class Client : MonoBehaviour
     [SerializeField] private Transform LocalPlayerTransform;
     [SerializeField] private GameObject OtherPlayerPrefab;
     [SerializeField] private Transform WaitingRoomLocation;
+    [SerializeField] private Transform MainRoomLocation;
     [SerializeField] private ConnectUIController ConnectUIController;
+    [SerializeField] private TMP_Text StatusText;
+
+    public static event Action EnteringBuildingMode;
+    public static event Action ExitingBuildingMode;
 
     private SimpleWebClient _webClient;
     private BitBuffer _bitBuffer = new BitBuffer(1024);
     private byte[] _buffer = new byte[1024];
     private Dictionary<ushort, PositionInterp> _otherPlayers = new Dictionary<ushort, PositionInterp>();
     private Dictionary<ushort, string> _names = new Dictionary<ushort, string>();
+    private Dictionary<ushort, short> _points = new Dictionary<ushort, short>();
     private ushort _myId;
     private bool _handShakeComplete = false;
     private float _timeToSendNextUpdate = 0;
     private GameState _currentState;
     private ushort _builderId;
+    private HashSet<ushort> _movedItems;
+
+    private void Start()
+    {
+        EnterSearchMode();
+        _movedItems = new HashSet<ushort>();
+        _movedItems.Add(1);
+    }
 
     private void Awake()
     {
@@ -33,6 +47,7 @@ public class Client : MonoBehaviour
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
         _webClient.onConnect += WebClientOnonConnect;
         _webClient.onData += WebClientOnonData;
+        Builder.ObjectMoved += BuilderOnObjectMoved;
     }
 
     public void Connect()
@@ -67,6 +82,9 @@ public class Client : MonoBehaviour
                     string name = _bitBuffer.ReadString();
                     _names[id] = name;
                 }
+
+                // Put my name into _names too for when I am the builder
+                _names[_myId] = ConnectUIController.DisplayName;
                 
                 HandleStateChange(_currentState);
                 _handShakeComplete = true;
@@ -96,6 +114,7 @@ public class Client : MonoBehaviour
                         // Create new player
                         GameObject newPlayer = Instantiate(OtherPlayerPrefab, position, Quaternion.identity);
                         Destroy(newPlayer.GetComponent<Rigidbody2D>());
+                        Destroy(newPlayer.GetComponent<CircleCollider2D>());
                         Destroy(newPlayer.GetComponent<PlayerController>());
                         PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
                         positionInterp.enabled = true;
@@ -123,6 +142,18 @@ public class Client : MonoBehaviour
                 _currentState = (GameState)_bitBuffer.ReadByte();
                 HandleStateChange(_currentState);
                 
+                break;
+            }
+            case 7:
+            {
+                ushort count = _bitBuffer.ReadUShort();
+                for (int i = 0; i < count; i++)
+                {
+                    ushort id = _bitBuffer.ReadUShort();
+                    short points = _bitBuffer.ReadShort();
+                    _points[id] = points;
+                }
+
                 break;
             }
             case 9:
@@ -195,27 +226,132 @@ public class Client : MonoBehaviour
             {
                 // Tell people who the builder will be
                 _builderId = _bitBuffer.ReadUShort();
+                string name = _names[_builderId];
+                StatusText.enabled = true;
+                StatusText.text = "Next Shifter:\n" + name;
                 Debug.Log("New state: Begin");
                 break;
             }
             case GameState.Builder:
             {
                 // If we are builder, enter builder mode
+                if (_myId == _builderId)
+                {
+                    EnterBuildingMode();
+                }
+                else
+                {
+                    string name = _names[_builderId];
+                    StatusText.enabled = true;
+                    StatusText.text = "Waiting for Shifter:\n" + name;
+                }
+                
                 Debug.Log("New state: Builder");
                 break;
             }
             case GameState.Search:
             {
+                _movedItems = new HashSet<ushort>();
+                int count = _bitBuffer.ReadUShort();
+                for (int i = 0; i < count; i++)
+                {
+                    ushort objectId = _bitBuffer.ReadUShort();
+                    _movedItems.Add(objectId);
+                }
+                
                 // If we are not builder, enter searching mode
+                if (_myId == _builderId)
+                {
+                    ExitBuildingMode();
+                }
+                else
+                {
+                    EnterSearchMode();
+                }
+                
                 Debug.Log("New state: Search");
                 break;
             }
             case GameState.Scoring:
             {
-                // Nothing? Wait for scoring message
+                if (_myId != _builderId)
+                {
+                    ExitSearchMode();
+                }
+                // Teleport to waiting room
+                LocalPlayerTransform.position = WaitingRoomLocation.position;
+                
                 Debug.Log("New state: Scoring");
                 break;
             }
         }
+    }
+
+    private void EnterBuildingMode()
+    {
+        _movedItems = new HashSet<ushort>();
+        GetComponent<Builder>().enabled = true;
+        EnteringBuildingMode?.Invoke();
+        LocalPlayerTransform.position = MainRoomLocation.position;
+        UpdateBuilderStatusText();
+    }
+
+    private void ExitBuildingMode()
+    {
+        GetComponent<Builder>().enabled = false;
+        ExitingBuildingMode?.Invoke();
+        StatusText.enabled = false;
+    }
+    
+    private void BuilderOnObjectMoved(ushort objectId)
+    {
+        // If we haven't moved this object before
+        if (!_movedItems.Contains(objectId))
+        {
+            _movedItems.Add(objectId);
+            UpdateBuilderStatusText();
+            
+            // Tell server we moved an object
+            _bitBuffer.Clear();
+            _bitBuffer.AddByte(10);
+            _bitBuffer.AddUShort(objectId);
+            _bitBuffer.ToArray(_buffer);
+            _webClient.Send(new ArraySegment<byte>(_buffer, 0, 2));
+        }
+    }
+
+    private void UpdateBuilderStatusText()
+    {
+        StatusText.enabled = true;
+        StatusText.text = "Objects moved: " + _movedItems.Count + "/" + Constants.MAX_SHIFTED_OBJECTS;
+    }
+
+    private void EnterSearchMode()
+    {
+        Interacter interacter = GetComponent<Interacter>();
+        interacter.enabled = true;
+        interacter.PointChange = 0;
+        
+        LocalPlayerTransform.position = MainRoomLocation.position;
+    }
+
+    public bool IsMyGuessCorrect(ushort guessId)
+    {
+        return _movedItems.Contains(guessId);
+    }
+
+    private void ExitSearchMode()
+    {
+        Interacter interacter = GetComponent<Interacter>();
+        
+        // Tell server your points change
+        int pointChange = interacter.PointChange;
+        _bitBuffer.Clear();
+        _bitBuffer.AddByte(11);
+        _bitBuffer.AddShort((short) pointChange);
+        _bitBuffer.ToArray(_buffer);
+        _webClient.Send(new ArraySegment<byte>(_buffer, 0, 3));
+        
+        interacter.enabled = false;
     }
 }

@@ -28,4 +28,11 @@ public class PositionInterp : MonoBehaviour
         _previousPosition = _nextPosition;
         _nextPosition = position;
     }
+
+    public void Teleport(Vector3 position)
+    {
+        _t = 0;
+        _previousPosition = position;
+        _nextPosition = position;
+    }
 }

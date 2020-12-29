@@ -8,6 +8,7 @@ public static class Constants
     // SERVER + CLIENT
     public static readonly ushort GAME_PORT = 9001;
     public static readonly ushort SERVER_TICKRATE = 25;
+    public static readonly int MAX_SHIFTED_OBJECTS = 3;
     
     // CLIENT
     public static readonly int GRID_WIDTH = 10;
@@ -21,4 +22,5 @@ public static class Constants
     };
 
     public static readonly int CLIENT_TICKRATE = 25;
+    public static readonly int[] CAMERA_REF_RESOLUTION = new[] {192, 120};
 }

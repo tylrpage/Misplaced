@@ -47,7 +47,7 @@ namespace Server
         public static readonly float SECONDS_WAITING_IN_SCORING = 3f;
         public static readonly int NUMBER_OF_MOVEABLE_OBJECTS = 3;
 
-        private static Timer beginTimer, buildTimer, searchTimer, scoringTimer;
+        private static Timer beginTimer, buildTimer, searchTimer;
 
         private static SimpleWebServer _webServer;
         private static List<int> _connectedIds = new List<int>();
@@ -156,36 +156,22 @@ namespace Server
                     }
                     case GameState.Scoring:
                     {
-                        // Set timer to wait for points to come in from clients
-                        scoringTimer = new Timer(SECONDS_WAITING_IN_SCORING * 1000);
-                        scoringTimer.AutoReset = false;
-                        scoringTimer.Start();
-                        _waitingOnStateTimer = true;
+                        short builderPoints = 0;
 
-                        scoringTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
+                        _bitBuffer.Clear();
+                        _bitBuffer.AddByte(7);
+                        _bitBuffer.AddUShort((ushort)_playerDatas.Count);
 
-                            // Tell everyone everyones scores
-                            _bitBuffer.Clear();
-                            _bitBuffer.AddByte(7);
-                            _bitBuffer.AddUShort((ushort)_playerDatas.Count);
+                        _bitBuffer.ToArray(_buffer);
+                        _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 2 * _playerDatas.Count));
 
-                            foreach (PlayerData data in _playerDatas.Values) {
-                                _bitBuffer.AddUShort(data.id);
-                                _bitBuffer.AddShort(data.points);
-                            }
-
-                            _bitBuffer.ToArray(_buffer);
-                            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 4 * _playerDatas.Count));
-
-                            if (_connectedIds.Count >= 2) {
-                                _currentState = GameState.Begin;
-                            }
-                            else {
-                                _currentState = GameState.Waiting;
-                            }
-                            SendStateUpdate(_currentState);
-                        };
+                        if (_connectedIds.Count >= 2) {
+                            _currentState = GameState.Begin;
+                        }
+                        else {
+                            _currentState = GameState.Waiting;
+                        }
+                        SendStateUpdate(_currentState);
 
                         break;
                     }

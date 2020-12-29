@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 
 public class CameraController : MonoBehaviour
 {
@@ -15,7 +16,24 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
-        transform.position = new Vector3(_targetPosition.x, _targetPosition.y, -10f);;
+        transform.position = new Vector3(_targetPosition.x, _targetPosition.y, -10f);
+        
+        Client.EnteringBuildingMode += ClientOnEnteringBuildingMode;
+        Client.ExitingBuildingMode += ClientOnExitingBuildingMode;
+    }
+
+    private void ClientOnExitingBuildingMode()
+    {
+        PixelPerfectCamera pixelPerfectCamera = GetComponent<PixelPerfectCamera>();
+        pixelPerfectCamera.refResolutionX = Constants.CAMERA_REF_RESOLUTION[0];
+        pixelPerfectCamera.refResolutionY = Constants.CAMERA_REF_RESOLUTION[1];
+    }
+
+    private void ClientOnEnteringBuildingMode()
+    {
+        PixelPerfectCamera pixelPerfectCamera = GetComponent<PixelPerfectCamera>();
+        pixelPerfectCamera.refResolutionX = Constants.CAMERA_REF_RESOLUTION[0] * 2;
+        pixelPerfectCamera.refResolutionY = Constants.CAMERA_REF_RESOLUTION[1] * 2;
     }
 
     // Update is called once per frame
@@ -27,5 +45,10 @@ public class CameraController : MonoBehaviour
         _targetPosition = FollowTarget.position + clampedMouseOffset;
         _targetPosition = new Vector3(_targetPosition.x, _targetPosition.y, -10f);
         transform.position = Vector3.Lerp(transform.position, _targetPosition, PositionLerpAmount);
+    }
+
+    private void OnDestroy()
+    {
+        Client.EnteringBuildingMode -= ClientOnEnteringBuildingMode;
     }
 }

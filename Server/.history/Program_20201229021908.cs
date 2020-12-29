@@ -165,18 +165,18 @@ namespace Server
                         scoringTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
                             _waitingOnStateTimer = false;
 
-                            // Tell everyone everyones scores
                             _bitBuffer.Clear();
                             _bitBuffer.AddByte(7);
                             _bitBuffer.AddUShort((ushort)_playerDatas.Count);
-
+                            
                             foreach (PlayerData data in _playerDatas.Values) {
-                                _bitBuffer.AddUShort(data.id);
-                                _bitBuffer.AddShort(data.points);
+
                             }
 
+                            
+
                             _bitBuffer.ToArray(_buffer);
-                            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 4 * _playerDatas.Count));
+                            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 2 * _playerDatas.Count));
 
                             if (_connectedIds.Count >= 2) {
                                 _currentState = GameState.Begin;

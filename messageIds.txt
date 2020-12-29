@@ -7,3 +7,5 @@
 7: Message from server telling clients their new points
 8: Message from client telling server its name and maybe other stuff (customized character) on connect
 9: Message from server telling clients a players name
+10: message from client tell server it moved an item
+11: Message from client telling server its point change

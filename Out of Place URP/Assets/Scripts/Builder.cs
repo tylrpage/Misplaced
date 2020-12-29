@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Builder : MonoBehaviour
 {
+    public static event Action<ushort> ObjectMoved; 
+    
     private Camera _mainCamera;
     private Vector3 _mousePos;
 
@@ -12,7 +15,6 @@ public class Builder : MonoBehaviour
 
     private bool[,] _grid;
     private GridItem _highlightedItem;
-    private Vector3 _initialClickOffset;
     private bool _movingItem;
     private bool _currentlyInValidPosition;
     
@@ -67,7 +69,7 @@ public class Builder : MonoBehaviour
         }
         else
         {
-            _highlightedItem.Move(_mousePos - _initialClickOffset);
+            _highlightedItem.Move(_mousePos);
             _currentlyInValidPosition = IsPositionValid(_grid, _highlightedItem.X, _highlightedItem.Y,
                 _highlightedItem.Width,
                 _highlightedItem.Height);
@@ -103,15 +105,13 @@ public class Builder : MonoBehaviour
                         UpdateGrid(_grid, _highlightedItem);
                         _highlightedItem.InitialX = _highlightedItem.X;
                         _highlightedItem.InitialY = _highlightedItem.Y;
+                        
+                        ObjectMoved?.Invoke(_highlightedItem.Id);
                     }
                     
                     // Either way, drop it
                     _highlightedItem = null;
                     _renderer.material.SetColor("Color_BC0A261F", Color.white);
-                }
-                else if (!_movingItem)
-                {
-                    _initialClickOffset = _mousePos - _highlightedItem.transform.position;
                 }
                 
                 _movingItem = !_movingItem;
