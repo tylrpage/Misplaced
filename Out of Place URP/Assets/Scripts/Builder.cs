@@ -17,6 +17,7 @@ public class Builder : MonoBehaviour
     private GridItem _highlightedItem;
     private bool _movingItem;
     private bool _currentlyInValidPosition;
+    private GrabbyHandBehavior _grabbyHand;
     
     // Start is called before the first frame update
     void Start()
@@ -24,6 +25,7 @@ public class Builder : MonoBehaviour
         _mainCamera = Camera.main;
         
         _grid = PopulateBoolGrid();
+        _grabbyHand = GetComponent<GrabbyHandBehavior>();
     }
 
     // Update is called once per frame
@@ -35,6 +37,9 @@ public class Builder : MonoBehaviour
         {
             if (hit.collider != null && hit.transform.CompareTag("Moveable"))
             {
+                // Open grabby hand
+                _grabbyHand.OpenHand();
+                
                 if (_previousCollider == null || !_active)
                 {
                     _active = true;
@@ -65,6 +70,8 @@ public class Builder : MonoBehaviour
                 _active = false;
                 _renderer.material.SetFloat("Vector1_5D8044E5", 0);
                 _highlightedItem = null;
+                
+                _grabbyHand.Pointer();
             }
         }
         else
@@ -106,12 +113,19 @@ public class Builder : MonoBehaviour
                         _highlightedItem.InitialX = _highlightedItem.X;
                         _highlightedItem.InitialY = _highlightedItem.Y;
                         
+                        _grabbyHand.OpenHand();
+
                         ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);
                     }
                     
                     // Either way, drop it
                     _highlightedItem = null;
                     _renderer.material.SetColor("Color_BC0A261F", Color.white);
+                }
+                else
+                {
+                    // Close/Grab with grabby hand
+                    _grabbyHand.CloseHand();
                 }
                 
                 _movingItem = !_movingItem;

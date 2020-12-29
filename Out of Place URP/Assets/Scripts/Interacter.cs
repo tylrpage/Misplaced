@@ -17,12 +17,14 @@ public class Interacter : MonoBehaviour
     private Vector3 _clampedPos;
     private GridItem _highlightedItem;
     private Client _client;
+    private GrabbyHandBehavior _grabbyHand;
 
     public int PointChange;
 
     void Awake()
     {
         _client = GetComponent<Client>();
+        _grabbyHand = GetComponent<GrabbyHandBehavior>();
         _mainCamera = Camera.main;
     }
 
@@ -36,8 +38,19 @@ public class Interacter : MonoBehaviour
 
         if (hit.collider != null && hit.transform.CompareTag("Moveable"))
         {
+            if (Input.GetMouseButtonDown(0))
+            {
+                _grabbyHand.CloseHand();
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                _grabbyHand.OpenHand();
+            }
+            
             if (_previousCollider == null || !_active)
             {
+                _grabbyHand.OpenHand();
+                
                 _active = true;
                 
                 _previousCollider = hit.collider;
@@ -66,6 +79,8 @@ public class Interacter : MonoBehaviour
         }
         else if(_active)
         {
+            _grabbyHand.Pointer();
+            
             _active = false;
             // Only remove borders on non picked items
             if (!_highlightedItem.Picked)

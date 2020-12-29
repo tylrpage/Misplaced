@@ -254,6 +254,9 @@ public class Client : MonoBehaviour
                     _movedItems[objectId] = new Tuple<int, int>(newX, newY);
                 }
                 
+                // Searching status text
+                
+                
                 // If we are not builder, enter searching mode
                 if (_myId == _builderId)
                 {
