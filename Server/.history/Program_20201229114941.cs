@@ -41,7 +41,7 @@ namespace Server
     }
     class Program
     {
-        public static readonly float SECONDS_WAITING_IN_BEGIN = 5f;
+        public static readonly float SECONDS_WAITING_IN_BEGIN = 3f;
         public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
         public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
         public static readonly float SECONDS_WAITING_IN_SCORING = 3f;
@@ -270,6 +270,8 @@ namespace Server
                 {
                     short pointChange = _bitBuffer.ReadShort();
                     _playerDatas[id].points += pointChange;
+
+                    Console.WriteLine($"Got point change {id} {pointChange}");
 
                     // If points are 0 or less, give builder a point
                     if (pointChange <= 0) {

@@ -32,11 +32,14 @@ public class Client : MonoBehaviour
     private float _timeToSendNextUpdate = 0;
     private GameState _currentState;
     private ushort _builderId;
+    private MoveableReferencer _moveableReferencer;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
     private void Awake()
     {
+        _moveableReferencer = GetComponent<MoveableReferencer>();
+        
         TcpConfig tcpConfig = new TcpConfig(true, 5000, 20000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
         _webClient.onConnect += WebClientOnonConnect;
@@ -141,6 +144,7 @@ public class Client : MonoBehaviour
             case 7:
             {
                 ushort count = _bitBuffer.ReadUShort();
+                Debug.Log("count: " + count);
                 for (int i = 0; i < count; i++)
                 {
                     ushort id = _bitBuffer.ReadUShort();
@@ -151,7 +155,7 @@ public class Client : MonoBehaviour
                     {
                         LocalPlayerTransform.GetComponent<Nametag>().SetPts(points);
                     }
-                    else
+                    else if (_otherPlayers.ContainsKey(id))
                     {
                         _otherPlayers[id].GetComponent<Nametag>().SetPts(points);
                     }
@@ -281,6 +285,9 @@ public class Client : MonoBehaviour
             }
             case GameState.Scoring:
             {
+                // Reset all items and outlines
+                _moveableReferencer.ResetMoveables();
+                
                 if (_myId != _builderId)
                 {
                     ExitSearchMode();
@@ -339,10 +346,9 @@ public class Client : MonoBehaviour
     private void EnterSearchMode()
     {
         // Move the moved items to their new positions
-        MoveableReferencer moveableReferencer = GetComponent<MoveableReferencer>();
         foreach (var movedItem in MovedItems)
         {
-            GridItem gridItem = moveableReferencer.Moveables[movedItem.Key];
+            GridItem gridItem = _moveableReferencer.Moveables[movedItem.Key];
             gridItem.MoveToGridPos((ushort)movedItem.Value.Item1, (ushort)movedItem.Value.Item2);
         }
         

@@ -7,6 +7,7 @@ using UnityEngine;
 public class MoveableReferencer : MonoBehaviour
 {
     public Dictionary<ushort, GridItem> Moveables { get; private set; } = new Dictionary<ushort, GridItem>();
+    public Dictionary<ushort, SpriteRenderer> MoveablesRenderers = new Dictionary<ushort, SpriteRenderer>();
     
     private void Awake()
     {
@@ -15,18 +16,21 @@ public class MoveableReferencer : MonoBehaviour
         {
             GridItem gridItem = moveableObject.GetComponent<GridItem>();
             Moveables[gridItem.Id] = gridItem;
+            MoveablesRenderers[gridItem.Id] = moveableObject.GetComponent<SpriteRenderer>();
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void ResetMoveables()
     {
-        
-    }
+        foreach (var moveableObject in Moveables.Values)
+        {
+            moveableObject.ResetPosition();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        foreach (var renderers in MoveablesRenderers.Values)
+        {
+            renderers.material.SetFloat("Vector1_5D8044E5", 0);
+            renderers.material.SetColor("Color_BC0A261F", Color.white);
+        }
     }
 }

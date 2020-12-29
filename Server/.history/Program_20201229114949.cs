@@ -41,7 +41,7 @@ namespace Server
     }
     class Program
     {
-        public static readonly float SECONDS_WAITING_IN_BEGIN = 5f;
+        public static readonly float SECONDS_WAITING_IN_BEGIN = 3f;
         public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
         public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
         public static readonly float SECONDS_WAITING_IN_SCORING = 3f;

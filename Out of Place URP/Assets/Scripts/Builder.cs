@@ -110,8 +110,8 @@ public class Builder : MonoBehaviour
                         // so that it will reset to this spot next time and can update the grid
                         // correctly if moved again
                         UpdateGrid(_grid, _highlightedItem);
-                        _highlightedItem.InitialX = _highlightedItem.X;
-                        _highlightedItem.InitialY = _highlightedItem.Y;
+                        // _highlightedItem.InitialX = _highlightedItem.X;
+                        // _highlightedItem.InitialY = _highlightedItem.Y;
                         
                         _grabbyHand.OpenHand();
 
