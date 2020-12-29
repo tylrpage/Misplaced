@@ -17,6 +17,7 @@ public class TimerTextController : MonoBehaviour
         if (_enabled)
         {
             _timeLeft -= Time.deltaTime;
+            _timeLeft = Mathf.Max(_timeLeft, 0); // dont let timer go below 0
             TimerText.text = "Time Left " + _phase + ": " + Math.Ceiling(_timeLeft) + "s";
         }
     }
