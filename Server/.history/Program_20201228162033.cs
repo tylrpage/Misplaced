@@ -4,33 +4,15 @@ using System.Security.Authentication;
 using System.Collections.Generic;
 using NetStack.Serialization;
 using NetStack.Quantization;
-using System.Timers;
 
 namespace Server
 {
     public class PlayerData {
-        public ushort id;
-        public bool isNew;
+        public int id;
+        public bool new;
         public uint qX;
         public uint qY;
         public ushort points;
-
-        // Default ctor
-        public PlayerData() {
-            id = ushort.MaxValue;
-            isNew = true;
-            qX = uint.MaxValue;
-            qY = uint.MaxValue;
-            points = 0;
-        }
-
-        // Copy ctor
-        public PlayerData(PlayerData copy) {
-            id = copy.id;
-            qX = copy.qX;
-            qY = copy.qY;
-            points = copy.points;
-        }
     }
     class Program
     {
@@ -38,9 +20,7 @@ namespace Server
         private static List<int> _connectedIds = new List<int>();
         private static Dictionary<int, PlayerData> _playerDatas = new Dictionary<int, PlayerData>();
         private static Queue<PlayerData> _dataToSend = new Queue<PlayerData>();
-
         private static BitBuffer _bitBuffer = new BitBuffer(1024);
-        private static byte[] _buffer = new byte[2048];
 
         enum GameState {Waiting, Begin, Builder, Search, Scoring}
         static GameState _currentState = GameState.Waiting;
@@ -59,11 +39,6 @@ namespace Server
             _webServer.onData += WebServerOnData;
             _webServer.onDisconnect += WebServerOnDisconnect;
 
-            Timer stateUpdateTimer = new Timer(1f / Constants.SERVER_TICKRATE * 1000);
-            stateUpdateTimer.Elapsed += StateUpdateTimerOnElapsed;
-            stateUpdateTimer.AutoReset = true;
-            stateUpdateTimer.Enabled = true;
-
             while (!Console.KeyAvailable) {
                 _webServer.ProcessMessageQueue();
             }
@@ -74,18 +49,15 @@ namespace Server
 
         static void WebServerOnConnect(int id) {
             _connectedIds.Add(id);
-            _playerDatas[id] = new PlayerData();
-
-            // Tell new client their id
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(2);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 3));
+            _playerDatas[id] = new PlayerData() {
+                id = id,
+                points = 0,
+                qX = 0,
+                qY = 0
+            };
         }
 
         static void WebServerOnData(int id, ArraySegment<byte> data) {
-            _bitBuffer.Clear();
             _bitBuffer.FromArray(data.Array, data.Count);
 
             byte messageId = _bitBuffer.ReadByte();
@@ -110,29 +82,6 @@ namespace Server
         static void WebServerOnDisconnect(int id) {
             _connectedIds.Remove(id);
             _playerDatas.Remove(id);
-
-            // Tell other players about the disconnection
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(4);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
-        }
-
-        private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(3);
-            _bitBuffer.AddUShort((ushort)_dataToSend.Count);
-            foreach (PlayerData playerData in _dataToSend) {
-                _bitBuffer.AddUShort(playerData.id);
-                _bitBuffer.AddUInt(playerData.qX);
-                _bitBuffer.AddUInt(playerData.qY);
-            }
-
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 10 * _dataToSend.Count));
-
-            _dataToSend.Clear();
         }
     }
 }

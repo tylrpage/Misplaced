@@ -19,14 +19,15 @@ namespace Server
         public PlayerData() {
             id = ushort.MaxValue;
             isNew = true;
-            qX = uint.MaxValue;
-            qY = uint.MaxValue;
-            points = 0;
+            qX = copy.qX;
+            qY = copy.qY;
+            points = copy.points;
         }
 
         // Copy ctor
         public PlayerData(PlayerData copy) {
             id = copy.id;
+            isNew = copy.isNew;
             qX = copy.qX;
             qY = copy.qY;
             points = copy.points;
@@ -74,18 +75,16 @@ namespace Server
 
         static void WebServerOnConnect(int id) {
             _connectedIds.Add(id);
-            _playerDatas[id] = new PlayerData();
-
-            // Tell new client their id
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(2);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 3));
+            _playerDatas[id] = new PlayerData() {
+                id = (ushort)id,
+                isNew = true,
+                points = 0,
+                qX = 0,
+                qY = 0
+            };
         }
 
         static void WebServerOnData(int id, ArraySegment<byte> data) {
-            _bitBuffer.Clear();
             _bitBuffer.FromArray(data.Array, data.Count);
 
             byte messageId = _bitBuffer.ReadByte();
@@ -110,13 +109,6 @@ namespace Server
         static void WebServerOnDisconnect(int id) {
             _connectedIds.Remove(id);
             _playerDatas.Remove(id);
-
-            // Tell other players about the disconnection
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(4);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {

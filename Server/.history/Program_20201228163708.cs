@@ -78,14 +78,10 @@ namespace Server
 
             // Tell new client their id
             _bitBuffer.Clear();
-            _bitBuffer.AddByte(2);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 3));
+            _bitBuffer.AddByte(2)
         }
 
         static void WebServerOnData(int id, ArraySegment<byte> data) {
-            _bitBuffer.Clear();
             _bitBuffer.FromArray(data.Array, data.Count);
 
             byte messageId = _bitBuffer.ReadByte();
@@ -110,13 +106,6 @@ namespace Server
         static void WebServerOnDisconnect(int id) {
             _connectedIds.Remove(id);
             _playerDatas.Remove(id);
-
-            // Tell other players about the disconnection
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(4);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {

@@ -112,11 +112,6 @@ namespace Server
             _playerDatas.Remove(id);
 
             // Tell other players about the disconnection
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(4);
-            _bitBuffer.AddUShort((ushort)id);
-            _bitBuffer.ToArray(_buffer);
-            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
