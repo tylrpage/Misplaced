@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class Builder : MonoBehaviour
 {
-    public static event Action<ushort, int, int> ObjectMoved; 
+    public static event Action<ushort, int, int> ObjectMoved;
+
+    [SerializeField] private AudioClip PickupSound;
+    [SerializeField] private AudioClip PlaceSound;
     
     private Camera _mainCamera;
     private Vector3 _mousePos;
@@ -21,6 +24,7 @@ public class Builder : MonoBehaviour
     private GrabbyHandBehavior _grabbyHand;
     private ushort _numberOfMovedObjects = 0;
     private HashSet<ushort> _movedObjects;
+    private AudioSource _audioSource;
     
     // Start is called before the first frame update
     void Start()
@@ -29,6 +33,7 @@ public class Builder : MonoBehaviour
         
         _grid = PopulateBoolGrid();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
+        _audioSource = GetComponent<AudioSource>();
         Client.ExitingBuildingMode += ClientOnExitingBuildingMode;
     }
 
@@ -142,6 +147,8 @@ public class Builder : MonoBehaviour
 
                         _movedObjects.Add(_highlightedItem.Id);
                         _numberOfMovedObjects += 1;
+                        
+                        _audioSource.PlayOneShot(PlaceSound);
 
                         ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);
                     }
@@ -154,6 +161,8 @@ public class Builder : MonoBehaviour
                 {
                     // Close/Grab with grabby hand
                     _grabbyHand.CloseHand();
+                    
+                    _audioSource.PlayOneShot(PickupSound);
                 }
                 
                 _movingItem = !_movingItem;
