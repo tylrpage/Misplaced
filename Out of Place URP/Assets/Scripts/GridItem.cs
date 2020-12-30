@@ -14,6 +14,8 @@ public class GridItem : MonoBehaviour
     public int InitialY;
     public int RoundX;
     public int RoundY;
+    public bool Reference;
+    public int ReferenceGridOffset;
     
     public int X;
     public int Y;
@@ -70,7 +72,14 @@ public class GridItem : MonoBehaviour
 
     private float GridXToWorldPos(int x)
     {
-        return x * Constants.GRID_UNITS + ((Constants.GRID_UNITS / 2f) * Width);
+        if (Reference)
+        {
+            return x * Constants.GRID_UNITS + ((Constants.GRID_UNITS / 2f) * Width) - ReferenceGridOffset * Constants.GRID_UNITS;
+        }
+        else
+        {
+            return x * Constants.GRID_UNITS + ((Constants.GRID_UNITS / 2f) * Width);
+        }
     }
     
     private float GridYToWorldPos(int y)
