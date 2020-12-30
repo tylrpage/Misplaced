@@ -35,6 +35,7 @@ public class Client : MonoBehaviour
     private MoveableReferencer _moveableReferencer;
     private TimerTextController _timerTextController;
     private ScoreboardController _scoreboardController;
+    private bool _wasHereForStartOfRound = false;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -94,7 +95,9 @@ public class Client : MonoBehaviour
                 }
                 _scoreboardController.DrawBoard();
 
-                HandleStateChange(_currentState);
+                StatusText.enabled = true;
+                StatusText.text = "Waiting for current round to end...";
+                    
                 _handShakeComplete = true;
                 break;
             }
@@ -231,6 +234,10 @@ public class Client : MonoBehaviour
 
     private void HandleStateChange(GameState gameState)
     {
+        // GUARD, DON'T DO BUILD OR SEARCH PHASE IF YOU JOINED IN THE MIDDLE
+        if (!_wasHereForStartOfRound && (gameState == GameState.Builder || gameState == GameState.Search))
+            return;
+        
         switch (gameState)
         {
             case GameState.Waiting:
@@ -245,6 +252,8 @@ public class Client : MonoBehaviour
             }
             case GameState.Begin:
             {
+                _wasHereForStartOfRound = true;
+                
                 // Tell people who the builder will be
                 _builderId = _bitBuffer.ReadUShort();
                 string name = _names[_builderId];

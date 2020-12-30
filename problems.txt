@@ -9,16 +9,12 @@ Problems:
 
 todo:
 
-- view original room
 - explode if got something wrong
-- bug: searcher: things you moved before have white outline after hover
-- bug: moving extra things, they sometimes snap to a different position
 - bug: extra players cant see old players characters
-- improve: let camera move in smaller increments
-- improve: make skybox same color at outside walls
 - improve: maybe zoom out camera more in searching view
 - remove names from head, pointer for your character
 - leaderboard in waiting/begin room
 
 did:
-- improve: check if camera can move in smaller increments
+- improve: let camera move in smaller increments
+- improve: make skybox same color at outside walls
