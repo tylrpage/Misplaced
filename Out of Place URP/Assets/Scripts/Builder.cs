@@ -105,9 +105,8 @@ public class Builder : MonoBehaviour
         else
         {
             _highlightedItem.Move(_mousePos);
-            _currentlyInValidPosition = IsPositionValid(_grid, _highlightedItem.X, _highlightedItem.Y,
-                _highlightedItem.Width,
-                _highlightedItem.Height);
+            _currentlyInValidPosition = IsPositionValid(_grid, _highlightedItem.X, _highlightedItem.Y, _highlightedItem.Width, _highlightedItem.Height) &&
+                                        (_highlightedItem.X != _highlightedItem.InitialX || _highlightedItem.Y != _highlightedItem.InitialY);
             if (_currentlyInValidPosition)
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.green);
@@ -144,7 +143,6 @@ public class Builder : MonoBehaviour
                         _grabbyHand.OpenHand();
 
                         _movedObjects.Add(_highlightedItem.Id);
-                        
                         _audioSource.PlayOneShot(PlaceSound);
 
                         ObjectMoved?.Invoke(_highlightedItem.Id, _highlightedItem.X, _highlightedItem.Y);
