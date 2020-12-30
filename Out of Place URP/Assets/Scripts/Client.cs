@@ -474,6 +474,14 @@ public class Client : MonoBehaviour
     private void ExitSearchMode()
     {
         Interacter interacter = GetComponent<Interacter>();
+
+        // Explode players who didnt pick anything by the end of the searching round
+        // and subtract a point
+        if (interacter.CorrectItems == 0 && interacter.WrongItems == 0)
+        {
+            interacter.ExplodePlayer();
+            interacter.WrongItems = 1;
+        }
         
         // Tell server your points change
         int pointChange = interacter.CorrectItems - interacter.WrongItems;
@@ -482,12 +490,6 @@ public class Client : MonoBehaviour
         _bitBuffer.AddShort((short) pointChange);
         _bitBuffer.ToArray(_buffer);
         _webClient.Send(new ArraySegment<byte>(_buffer, 0, 3));
-
-        // Explode players who didnt pick anything by the end of the searching round
-        if (interacter.CorrectItems == 0 && interacter.WrongItems == 0)
-        {
-            interacter.ExplodePlayer();
-        }
         
         interacter.enabled = false;
     }

@@ -44,7 +44,7 @@ namespace Server
     {
         public static readonly float SECONDS_WAITING_IN_BEGIN = 5f;
         public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
-        public static readonly float SECONDS_WAITING_IN_SEARCH = 20f;
+        public static readonly float SECONDS_WAITING_IN_SEARCH = 30f;
         public static readonly float SECONDS_WAITING_IN_SCORING = 3f;
         public static readonly int NUMBER_OF_MOVEABLE_OBJECTS = 3;
 
