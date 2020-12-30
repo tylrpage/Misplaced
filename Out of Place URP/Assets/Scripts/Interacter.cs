@@ -130,6 +130,7 @@ public class Interacter : MonoBehaviour
                 _audioSource.PlayOneShot(ExplodeSound);
                 _playerAnimator.Play("girl_explode");
                 _playerController.enabled = false;
+                LocalPlayerTransform.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
                 _exploded = true;
                 WrongGuessMade?.Invoke();
             }
