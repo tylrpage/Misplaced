@@ -38,6 +38,8 @@ public class Client : MonoBehaviour
     private ScoreboardController _scoreboardController;
     private bool _wasHereForStartOfRound = false;
     private AudioSource _audioSource;
+    private Vector3 _previousPlayerPosition = Vector3.zero;
+    private bool _overrideDirtySendRule = false;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -141,6 +143,7 @@ public class Client : MonoBehaviour
                         positionInterp.enabled = true;
                         _otherPlayers[id] = positionInterp;
                         newPlayer.GetComponent<Nametag>().SetName(_names[id]);
+                        _overrideDirtySendRule = true;
                     }
                     // Update the other players position
                     _otherPlayers[id].PushNewPosition(position);
@@ -234,7 +237,12 @@ public class Client : MonoBehaviour
         if (_webClient.ConnectionState == ClientState.Connected && Time.time >= _timeToSendNextUpdate)
         {
             _timeToSendNextUpdate = Time.time + (1f / Constants.CLIENT_TICKRATE);
-            
+
+            // GUARD, DONT SEND POSITION IF WE DIDN'T MOVE
+            if (!_overrideDirtySendRule && (_previousPlayerPosition - LocalPlayerTransform.position).magnitude < 0.1f)
+                return;
+
+
             // Send our position to server
             _bitBuffer.Clear();
             _bitBuffer.AddByte(1);
@@ -245,6 +253,9 @@ public class Client : MonoBehaviour
 
             _bitBuffer.ToArray(_buffer);
             _webClient.Send(new ArraySegment<byte>(_buffer, 0, 9));
+
+            _previousPlayerPosition = LocalPlayerTransform.position;
+            _overrideDirtySendRule = false;
         }
     }
 
