@@ -147,7 +147,9 @@ namespace Server
                                     if (data.id != _builderId) {
                                         data.points += 1;
                                     }
-                                    _playerDatas[_builderId].points -= (short)_handshakenClientCount;
+                                    else {
+                                        data.points -= 1;
+                                    }
                                 }
                                 _currentState = GameState.Scoring;
                             }
