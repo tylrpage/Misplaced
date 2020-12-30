@@ -15,11 +15,16 @@ public class MusicController : MonoBehaviour
 
     public void Play()
     {
-        _musicPlayer.Play();
+        if (!_playing)
+        {
+            _musicPlayer.Play();
+            _playing = true;
+        }
     }
 
     public void Pause()
     {
         _musicPlayer.Pause();
+        _playing = false;
     }
 }

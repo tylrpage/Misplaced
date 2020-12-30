@@ -302,6 +302,7 @@ public class Client : MonoBehaviour
                 StatusText.enabled = true;
                 StatusText.text = "Waiting for at least two players";
                 _timerTextController.HideTimer();
+                _musicController.Pause();
                 Debug.Log("New state: Waiting");
                 break;
             }
@@ -315,6 +316,7 @@ public class Client : MonoBehaviour
                 StatusText.enabled = true;
                 StatusText.text = "Next Shifter: " + name;
                 _timerTextController.HideTimer();
+                _musicController.Pause();
                 Debug.Log("New state: Begin");
                 break;
             }

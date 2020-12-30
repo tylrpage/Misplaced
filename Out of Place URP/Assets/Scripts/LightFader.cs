@@ -10,6 +10,7 @@ public class LightFader : MonoBehaviour
     public float MinIntensity;
     public float MaxIntensity;
     public float Speed;
+    public bool Scale;
     [SerializeField] private Light2D Light2D;
     [SerializeField] private Transform LightObject;
     private float _randomStart;
@@ -25,6 +26,9 @@ public class LightFader : MonoBehaviour
     {
         float func = Mathf.Abs(Mathf.Cos((Time.time) * Mathf.PI * Speed) + _randomStart);
         Light2D.intensity = func * (MaxIntensity - MinIntensity) + MinIntensity;
-        transform.localScale = new Vector3(func + 1, func + 1, 1);
+        if (Scale)
+        {
+            transform.localScale = new Vector3(func + 1, func + 1, 1);
+        }
     }
 }
