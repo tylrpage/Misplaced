@@ -18,7 +18,6 @@ public class LightFader : MonoBehaviour
     private void Awake()
     {
         _randomStart = Random.Range(0, 1f);
-        Debug.Log(_randomStart);
     }
 
     // Update is called once per frame
