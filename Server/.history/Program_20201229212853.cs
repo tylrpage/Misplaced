@@ -291,8 +291,7 @@ namespace Server
                     _bitBuffer.Clear();
                     _bitBuffer.AddByte(13);
                     _bitBuffer.AddUShort((ushort)id);
-                    _bitBuffer.ToArray(_buffer);
-                    _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
+                    
                 }
             }
         }

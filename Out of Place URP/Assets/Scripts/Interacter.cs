@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class Interacter : MonoBehaviour
 {
+    public static event Action WrongGuessMade;
+    
     [SerializeField] private Transform LocalPlayerTransform;
     [SerializeField] private TMP_Text StatusText;
     [SerializeField] private AudioClip DingSound;
@@ -126,6 +128,7 @@ public class Interacter : MonoBehaviour
                 _audioSource.PlayOneShot(ExplodeSound);
                 _playerAnimator.Play("girl_explode");
                 _playerController.enabled = false;
+                WrongGuessMade?.Invoke();
             }
             
             UpdateStatusText();

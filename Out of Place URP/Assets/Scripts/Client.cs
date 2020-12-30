@@ -17,6 +17,7 @@ public class Client : MonoBehaviour
     [SerializeField] private Transform MainRoomLocation;
     [SerializeField] private ConnectUIController ConnectUIController;
     [SerializeField] private TMP_Text StatusText;
+    [SerializeField] private AudioClip ExplodeSound;
 
     public static event Action EnteringBuildingMode;
     public static event Action ExitingBuildingMode;
@@ -36,6 +37,7 @@ public class Client : MonoBehaviour
     private TimerTextController _timerTextController;
     private ScoreboardController _scoreboardController;
     private bool _wasHereForStartOfRound = false;
+    private AudioSource _audioSource;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -44,14 +46,15 @@ public class Client : MonoBehaviour
         _moveableReferencer = GetComponent<MoveableReferencer>();
         _timerTextController = GetComponent<TimerTextController>();
         _scoreboardController = GetComponent<ScoreboardController>();
+        _audioSource = GetComponent<AudioSource>();
         
         TcpConfig tcpConfig = new TcpConfig(true, 5000, 20000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
         _webClient.onConnect += WebClientOnonConnect;
         _webClient.onData += WebClientOnonData;
         Builder.ObjectMoved += BuilderOnObjectMoved;
+        Interacter.WrongGuessMade += InteracterOnWrongGuessMade;
     }
-
     public void Connect()
     {
         // connect
@@ -189,6 +192,17 @@ public class Client : MonoBehaviour
                 // Add this new guy to the scoreboard
                 _scoreboardController.UpdateEntry(id, name, 0);
                 _scoreboardController.DrawBoard();
+
+                break;
+            }
+            case 13:
+            {
+                ushort id = _bitBuffer.ReadUShort();
+                if (_myId != id)
+                {
+                    _otherPlayers[id].GetComponentInChildren<Animator>().Play("girl_explode");
+                    _audioSource.PlayOneShot(ExplodeSound);
+                }
 
                 break;
             }
@@ -399,6 +413,12 @@ public class Client : MonoBehaviour
     public bool IsMyGuessCorrect(ushort guessId)
     {
         return MovedItems.ContainsKey(guessId);
+    }
+    
+    private void InteracterOnWrongGuessMade()
+    {
+        byte[] data = new byte[] {12};
+        _webClient.Send(new ArraySegment<byte>(data, 0, 1));
     }
 
     private void ExitSearchMode()

@@ -9,3 +9,5 @@
 9: Message from server telling clients a players name
 10: message from client tell server it moved an item
 11: Message from client telling server its point change
+12: Message from client telling server it exploded
+13: Message from server telling clients about a client exploding

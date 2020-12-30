@@ -2883,6 +2883,7 @@ MonoBehaviour:
   MainRoomLocation: {fileID: 775289098}
   ConnectUIController: {fileID: 927945233}
   StatusText: {fileID: 285585932}
+  ExplodeSound: {fileID: 8300000, guid: 5efdc345b6d3e534996bb10d5d259171, type: 3}
 --- !u!114 &863074315
 MonoBehaviour:
   m_ObjectHideFlags: 0
