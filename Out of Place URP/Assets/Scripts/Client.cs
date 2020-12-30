@@ -34,6 +34,7 @@ public class Client : MonoBehaviour
     private ushort _builderId;
     private MoveableReferencer _moveableReferencer;
     private TimerTextController _timerTextController;
+    private ScoreboardController _scoreboardController;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -41,6 +42,7 @@ public class Client : MonoBehaviour
     {
         _moveableReferencer = GetComponent<MoveableReferencer>();
         _timerTextController = GetComponent<TimerTextController>();
+        _scoreboardController = GetComponent<ScoreboardController>();
         
         TcpConfig tcpConfig = new TcpConfig(true, 5000, 20000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
@@ -75,12 +77,17 @@ public class Client : MonoBehaviour
                 _currentState = (GameState)_bitBuffer.ReadByte();
                 // Read all the ids and names it gives me and store it into _names to be used when players get spawned
                 ushort count = _bitBuffer.ReadUShort();
+                _scoreboardController.ResetScores();
                 for (int i = 0; i < count; i++)
                 {
                     ushort id = _bitBuffer.ReadUShort();
                     string name = _bitBuffer.ReadString();
+                    short score = _bitBuffer.ReadShort();
                     _names[id] = name;
+                    
+                    _scoreboardController.UpdateEntry(id, name, score);
                 }
+                _scoreboardController.DrawBoard();
 
                 // Put my name into _names too for when I am the builder
                 _names[_myId] = ConnectUIController.DisplayName;
@@ -146,22 +153,17 @@ public class Client : MonoBehaviour
             case 7:
             {
                 ushort count = _bitBuffer.ReadUShort();
-                Debug.Log("count: " + count);
+                _scoreboardController.ResetScores();
                 for (int i = 0; i < count; i++)
                 {
                     ushort id = _bitBuffer.ReadUShort();
                     short points = _bitBuffer.ReadShort();
-                    _points[id] = points;
 
-                    if (_myId == id)
-                    {
-                        LocalPlayerTransform.GetComponent<Nametag>().SetPts(points);
-                    }
-                    else if (_otherPlayers.ContainsKey(id))
-                    {
-                        _otherPlayers[id].GetComponent<Nametag>().SetPts(points);
-                    }
+                    // TODO: update scoreboard
+                    
+                    _scoreboardController.UpdateEntry(id, _names[id], points);
                 }
+                _scoreboardController.DrawBoard();
 
                 break;
             }

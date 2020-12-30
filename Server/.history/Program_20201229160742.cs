@@ -216,7 +216,6 @@ namespace Server
             {
                 _bitBuffer.AddUShort(playerData.id);
                 _bitBuffer.AddString(playerData.name);
-                _bitBuffer.AddShort(playerData.points);
             }
 
             _bitBuffer.ToArray(_buffer);

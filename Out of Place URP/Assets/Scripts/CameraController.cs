@@ -16,7 +16,7 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
-        transform.position = new Vector3(_targetPosition.x, _targetPosition.y, -10f);
+        transform.position = new Vector3(FollowTarget.position.x, FollowTarget.position.y, -10f);
         
         Client.EnteringBuildingMode += ClientOnEnteringBuildingMode;
         Client.ExitingBuildingMode += ClientOnExitingBuildingMode;
