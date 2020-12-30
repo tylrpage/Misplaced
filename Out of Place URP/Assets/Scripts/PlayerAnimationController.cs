@@ -9,6 +9,7 @@ public class PlayerAnimationController : MonoBehaviour
     private Vector3 _previousPosition;
     private string _currentAnimationState;
     private SpriteRenderer _spriteRenderer;
+    private bool _dead = false;
     
 
     private void Awake()
@@ -25,23 +26,26 @@ public class PlayerAnimationController : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        Vector3 difference = (transform.position - _previousPosition) / Time.deltaTime;
-        if (difference.magnitude > 0.01f)
+        if (!_dead)
         {
-            ChangeAnimationState("girl_run");
+            Vector3 difference = (transform.position - _previousPosition) / Time.deltaTime;
+            if (difference.magnitude > 0.01f)
+            {
+                ChangeAnimationState("girl_run");
 
-            if (difference.x < -0.01f)
-            {
-                _spriteRenderer.flipX = true;
+                if (difference.x < -0.01f)
+                {
+                    _spriteRenderer.flipX = true;
+                }
+                else if (difference.x > 0.01f)
+                {
+                    _spriteRenderer.flipX = false;
+                }
             }
-            else if (difference.x > 0.01f)
+            else
             {
-                _spriteRenderer.flipX = false;
+                ChangeAnimationState("girl_idle");
             }
-        }
-        else
-        {
-            ChangeAnimationState("girl_idle");
         }
 
         _previousPosition = transform.position;
@@ -53,5 +57,17 @@ public class PlayerAnimationController : MonoBehaviour
         
         _animator.Play(newState);
         _currentAnimationState = newState;
+    }
+
+    public void Explode()
+    {
+        _animator.Play("girl_explode");
+        _dead = true;
+    }
+
+    public void Revive()
+    {
+        _dead = false;
+        _animator.Play("girl_idle");
     }
 }

@@ -26,8 +26,8 @@ public class Interacter : MonoBehaviour
     private Client _client;
     private GrabbyHandBehavior _grabbyHand;
     private AudioSource _audioSource;
-    private Animator _playerAnimator;
     private PlayerController _playerController;
+    private PlayerAnimationController _playerAnimationController;
 
     public int CorrectItems;
     public int WrongItems;
@@ -37,8 +37,8 @@ public class Interacter : MonoBehaviour
         _client = GetComponent<Client>();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
         _audioSource = GetComponent<AudioSource>();
-        _playerAnimator = LocalPlayerTransform.GetComponentInChildren<Animator>();
         _playerController = LocalPlayerTransform.GetComponent<PlayerController>();
+        _playerAnimationController = LocalPlayerTransform.GetComponent<PlayerAnimationController>();
         _mainCamera = Camera.main;
     }
 
@@ -128,7 +128,7 @@ public class Interacter : MonoBehaviour
                 WrongItems += 1;
                 
                 _audioSource.PlayOneShot(ExplodeSound);
-                _playerAnimator.Play("girl_explode");
+                _playerAnimationController.Explode();
                 _playerController.enabled = false;
                 LocalPlayerTransform.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
                 _exploded = true;

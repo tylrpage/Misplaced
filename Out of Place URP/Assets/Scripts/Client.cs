@@ -225,7 +225,7 @@ public class Client : MonoBehaviour
                 ushort id = _bitBuffer.ReadUShort();
                 if (_myId != id)
                 {
-                    _otherPlayers[id].GetComponentInChildren<Animator>().Play("girl_explode");
+                    _otherPlayers[id].GetComponent<PlayerAnimationController>().Explode();
                     _audioSource.PlayOneShot(ExplodeSound);
                 }
 
@@ -380,6 +380,11 @@ public class Client : MonoBehaviour
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
                 // Let player walk again incase they exploded
                 LocalPlayerTransform.GetComponent<PlayerController>().enabled = true;
+                LocalPlayerTransform.GetComponent<PlayerAnimationController>().Revive();
+                foreach (var otherPlayer in _otherPlayers)
+                {
+                    otherPlayer.Value.GetComponent<PlayerAnimationController>().Revive();
+                }
 
                 StatusText.enabled = true;
                 StatusText.text = "Generating scores...";
