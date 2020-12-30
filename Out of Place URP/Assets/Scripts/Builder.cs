@@ -22,7 +22,6 @@ public class Builder : MonoBehaviour
     private bool _movingItem;
     private bool _currentlyInValidPosition;
     private GrabbyHandBehavior _grabbyHand;
-    private ushort _numberOfMovedObjects = 0;
     private HashSet<ushort> _movedObjects;
     private AudioSource _audioSource;
     
@@ -51,7 +50,6 @@ public class Builder : MonoBehaviour
 
     public void Reset()
     {
-        _numberOfMovedObjects = 0;
         _movedObjects = new HashSet<ushort>();
         _grid = PopulateBoolGrid();
         _movingItem = false;
@@ -146,7 +144,6 @@ public class Builder : MonoBehaviour
                         _grabbyHand.OpenHand();
 
                         _movedObjects.Add(_highlightedItem.Id);
-                        _numberOfMovedObjects += 1;
                         
                         _audioSource.PlayOneShot(PlaceSound);
 
@@ -256,6 +253,6 @@ public class Builder : MonoBehaviour
     // True when moving an object we haven't moved before and we moved max amount of objects
     private bool OverMovingLimit()
     {
-        return _numberOfMovedObjects >= Constants.MAX_SHIFTED_OBJECTS && !_movedObjects.Contains(_highlightedItem.Id);
+        return _movedObjects.Count >= Constants.MAX_SHIFTED_OBJECTS && !_movedObjects.Contains(_highlightedItem.Id);
     }
 }

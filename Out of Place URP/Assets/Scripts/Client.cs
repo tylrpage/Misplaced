@@ -96,8 +96,15 @@ public class Client : MonoBehaviour
                 _scoreboardController.DrawBoard();
 
                 StatusText.enabled = true;
-                StatusText.text = "Waiting for current round to end...";
-                    
+                if (_currentState == GameState.Waiting)
+                {
+                    StatusText.text = "Waiting for at least two players";
+                }
+                else
+                {
+                    StatusText.text = "Waiting for current round to end...";
+                }
+
                 _handShakeComplete = true;
                 break;
             }
@@ -352,21 +359,17 @@ public class Client : MonoBehaviour
     
     private void BuilderOnObjectMoved(ushort objectId, int newX, int newY)
     {
-        // If we haven't moved this object before
-        if (!MovedItems.ContainsKey(objectId))
-        {
-            MovedItems[objectId] = new Tuple<int, int>(newX, newY);
-            UpdateBuilderStatusText();
+        MovedItems[objectId] = new Tuple<int, int>(newX, newY);
+        UpdateBuilderStatusText();
 
-            // Tell server we moved an object
-            _bitBuffer.Clear();
-            _bitBuffer.AddByte(10);
-            _bitBuffer.AddUShort(objectId);
-            _bitBuffer.AddUShort((ushort)newX);
-            _bitBuffer.AddUShort((ushort)newY);
-            _bitBuffer.ToArray(_buffer);
-            _webClient.Send(new ArraySegment<byte>(_buffer, 0, 13));
-        }
+        // Tell server we moved an object
+        _bitBuffer.Clear();
+        _bitBuffer.AddByte(10);
+        _bitBuffer.AddUShort(objectId);
+        _bitBuffer.AddUShort((ushort)newX);
+        _bitBuffer.AddUShort((ushort)newY);
+        _bitBuffer.ToArray(_buffer);
+        _webClient.Send(new ArraySegment<byte>(_buffer, 0, 13));
     }
 
     private void UpdateBuilderStatusText()
