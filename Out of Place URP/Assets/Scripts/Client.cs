@@ -50,13 +50,21 @@ public class Client : MonoBehaviour
         _scoreboardController = GetComponent<ScoreboardController>();
         _audioSource = GetComponent<AudioSource>();
         
-        TcpConfig tcpConfig = new TcpConfig(true, 5000, 20000);
+        TcpConfig tcpConfig = new TcpConfig(true, 5000, 45000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
         _webClient.onConnect += WebClientOnonConnect;
         _webClient.onData += WebClientOnonData;
+        _webClient.onDisconnect += WebClientOnonDisconnect;
         Builder.ObjectMoved += BuilderOnObjectMoved;
         Interacter.WrongGuessMade += InteracterOnWrongGuessMade;
     }
+
+    private void WebClientOnonDisconnect()
+    {
+        StatusText.enabled = true;
+        StatusText.text = "You were disconnected. The AFK timer is 45s. Refresh to rejoin.";
+    }
+
     public void Connect()
     {
         // connect

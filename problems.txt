@@ -11,10 +11,11 @@ todo:
 
 - explode if got something wrong
 - bug: extra players cant see old players characters
-- improve: maybe zoom out camera more in searching view
-- remove names from head, pointer for your character
-- leaderboard in waiting/begin room
 
-did:
-- improve: let camera move in smaller increments
-- improve: make skybox same color at outside walls
+- tutorial
+- more building time?
+- didn't get teleported over to play area for searching?
+- bug: Kept moving after exploding
+- bug: can still choose things after exploded
+- bug: cant see people moving on left side
+- not hectic

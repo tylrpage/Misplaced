@@ -73,7 +73,7 @@ namespace Server
             _rand = new Random(Environment.TickCount);
 
             SslConfig sslConfig;
-            TcpConfig tcpConfig = new TcpConfig(true, 5000, 45000);
+            TcpConfig tcpConfig = new TcpConfig(true, 45000, 45000);
             Console.WriteLine("Setting up secure server");
             sslConfig = new SslConfig(true, "cert.pfx", "", SslProtocols.Tls12);
             _webServer = new SimpleWebServer(10000, tcpConfig, 16*1024, 3000, sslConfig);

@@ -17,6 +17,7 @@ public class Interacter : MonoBehaviour
     private SpriteRenderer _renderer;
     private Collider2D _previousCollider;
     private bool _active = false; // set to true when an object has an outline
+    private bool _exploded = false;
     
     private Camera _mainCamera;
     private Vector3 _mousePos;
@@ -45,6 +46,7 @@ public class Interacter : MonoBehaviour
     {
         CorrectItems = 0;
         WrongItems = 0;
+        _exploded = false;
         UpdateStatusText();
     }
 
@@ -56,7 +58,7 @@ public class Interacter : MonoBehaviour
                 MaxInteractRange) + LocalPlayerTransform.position;
         RaycastHit2D hit = Physics2D.Raycast(_clampedPos, Vector2.zero);
 
-        if (hit.collider != null && hit.transform.CompareTag("Moveable"))
+        if (hit.collider != null && hit.transform.CompareTag("Moveable") && !_exploded)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -110,7 +112,7 @@ public class Interacter : MonoBehaviour
             _highlightedItem = null;
         }
 
-        if (Input.GetMouseButtonDown(0) && _highlightedItem && !_highlightedItem.Picked)
+        if (Input.GetMouseButtonDown(0) && _highlightedItem && !_highlightedItem.Picked && !_exploded)
         {
             _highlightedItem.Picked = true;
             if (_client.IsMyGuessCorrect(_highlightedItem.Id))
@@ -128,6 +130,7 @@ public class Interacter : MonoBehaviour
                 _audioSource.PlayOneShot(ExplodeSound);
                 _playerAnimator.Play("girl_explode");
                 _playerController.enabled = false;
+                _exploded = true;
                 WrongGuessMade?.Invoke();
             }
             
