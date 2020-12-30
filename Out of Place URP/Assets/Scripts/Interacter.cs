@@ -126,13 +126,8 @@ public class Interacter : MonoBehaviour
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.red);
                 WrongItems += 1;
-                
-                _audioSource.PlayOneShot(ExplodeSound);
-                _playerAnimationController.Explode();
-                _playerController.enabled = false;
-                LocalPlayerTransform.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                _exploded = true;
-                WrongGuessMade?.Invoke();
+
+                ExplodePlayer();
             }
             
             UpdateStatusText();
@@ -144,5 +139,16 @@ public class Interacter : MonoBehaviour
     {
         StatusText.enabled = true;
         StatusText.text = "Found " + CorrectItems + "/" + _client.MovedItems.Count;
+    }
+
+    public void ExplodePlayer()
+    {
+        _audioSource.PlayOneShot(ExplodeSound);
+        _playerAnimationController.Explode();
+        _playerController.enabled = false;
+        LocalPlayerTransform.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        _exploded = true;
+        
+        WrongGuessMade?.Invoke();
     }
 }

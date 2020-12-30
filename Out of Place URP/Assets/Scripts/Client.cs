@@ -299,6 +299,11 @@ public class Client : MonoBehaviour
             {
                 // Teleport to waiting room
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
+                
+                // Let player walk again incase they exploded
+                LocalPlayerTransform.GetComponent<PlayerController>().enabled = true;
+                LocalPlayerTransform.GetComponent<PlayerAnimationController>().Revive();
+                
                 StatusText.enabled = true;
                 StatusText.text = "Waiting for at least two players";
                 _timerTextController.HideTimer();
@@ -309,6 +314,17 @@ public class Client : MonoBehaviour
             case GameState.Begin:
             {
                 _wasHereForStartOfRound = true;
+                
+                // Teleport to waiting room
+                LocalPlayerTransform.position = WaitingRoomLocation.position;
+                // Let player walk again incase they exploded
+                LocalPlayerTransform.GetComponent<PlayerController>().enabled = true;
+                LocalPlayerTransform.GetComponent<PlayerAnimationController>().Revive();
+                
+                foreach (var otherPlayer in _otherPlayers)
+                {
+                    otherPlayer.Value.GetComponent<PlayerAnimationController>().Revive();
+                }
                 
                 // Tell people who the builder will be
                 _builderId = _bitBuffer.ReadUShort();
@@ -375,15 +391,6 @@ public class Client : MonoBehaviour
                 if (_myId != _builderId)
                 {
                     ExitSearchMode();
-                }
-                // Teleport to waiting room
-                LocalPlayerTransform.position = WaitingRoomLocation.position;
-                // Let player walk again incase they exploded
-                LocalPlayerTransform.GetComponent<PlayerController>().enabled = true;
-                LocalPlayerTransform.GetComponent<PlayerAnimationController>().Revive();
-                foreach (var otherPlayer in _otherPlayers)
-                {
-                    otherPlayer.Value.GetComponent<PlayerAnimationController>().Revive();
                 }
 
                 StatusText.enabled = true;
@@ -475,6 +482,12 @@ public class Client : MonoBehaviour
         _bitBuffer.AddShort((short) pointChange);
         _bitBuffer.ToArray(_buffer);
         _webClient.Send(new ArraySegment<byte>(_buffer, 0, 3));
+
+        // Explode players who didnt pick anything by the end of the searching round
+        if (interacter.CorrectItems == 0 && interacter.WrongItems == 0)
+        {
+            interacter.ExplodePlayer();
+        }
         
         interacter.enabled = false;
     }
