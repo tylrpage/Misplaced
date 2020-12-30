@@ -164,8 +164,6 @@ public class Client : MonoBehaviour
                     ushort id = _bitBuffer.ReadUShort();
                     short points = _bitBuffer.ReadShort();
 
-                    // TODO: update scoreboard
-                    
                     _scoreboardController.UpdateEntry(id, _names[id], points);
                 }
                 _scoreboardController.DrawBoard();

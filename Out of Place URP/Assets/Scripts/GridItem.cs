@@ -53,6 +53,8 @@ public class GridItem : MonoBehaviour
     {
         X = InitialX;
         Y = InitialY;
+        RoundX = InitialX;
+        RoundY = InitialY;
         transform.position = new Vector3(GridXToWorldPos(X), GridYToWorldPos(Y), 0);
     }
 

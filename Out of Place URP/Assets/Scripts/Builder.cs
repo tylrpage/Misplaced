@@ -48,6 +48,9 @@ public class Builder : MonoBehaviour
     {
         _numberOfMovedObjects = 0;
         _movedObjects = new HashSet<ushort>();
+        _grid = PopulateBoolGrid();
+        _movingItem = false;
+        _highlightedItem = null;
     }
 
     // Update is called once per frame
@@ -189,7 +192,7 @@ public class Builder : MonoBehaviour
         {
             for (int y = 0; y < changedItem.Height; y++)
             {
-                grid[x + changedItem.InitialX, y + changedItem.InitialY] = false;
+                grid[x + changedItem.RoundX, y + changedItem.RoundY] = false;
             }
         }
         
@@ -208,6 +211,7 @@ public class Builder : MonoBehaviour
         bool[,] grid = new bool[Constants.GRID_WIDTH, Constants.GRID_HEIGHT];
         GameObject[] moveables = GameObject.FindGameObjectsWithTag("Moveable");
         GridItem gridItem;
+        // set object bools
         foreach (var moveable in moveables)
         {
             gridItem = moveable.GetComponent<GridItem>();
@@ -215,12 +219,29 @@ public class Builder : MonoBehaviour
             {
                 for (int x = 0; x < gridItem.Width; x++)
                 {
-                    grid[gridItem.X + x, gridItem.Y + y] = true;
+                    grid[gridItem.InitialX + x, gridItem.InitialY + y] = true;
                 }
             }
         }
+        
+        // set environment bools
+        AddGridBoundries(grid, 5, 8, 0, 2); // bottom pillar
+        AddGridBoundries(grid, 2, 4, 5, 7); // center pillar
+        AddGridBoundries(grid, 8, 13, 7, 10); // Upper right corner
 
         return grid;
+    }
+
+    // parameters are inclusive
+    private void AddGridBoundries(bool[,] grid, int x1, int x2, int y1, int y2)
+    {
+        for (int x = x1; x <= x2; x++)
+        {
+            for (int y = y1; y <= y2; y++)
+            {
+                grid[x, y] = true;
+            }
+        }
     }
 
     // True when moving an object we haven't moved before and we moved max amount of objects

@@ -3174,9 +3174,9 @@ MonoBehaviour:
   Id: 0
   Width: 1
   Height: 1
-  InitialX: 0
+  InitialX: 7
   InitialY: 9
-  RoundX: 7
+  RoundX: 0
   RoundY: 0
   X: 0
   Y: 0
