@@ -8,6 +8,8 @@ public class Interacter : MonoBehaviour
 {
     [SerializeField] private Transform LocalPlayerTransform;
     [SerializeField] private TMP_Text StatusText;
+    [SerializeField] private AudioClip DingSound;
+    [SerializeField] private AudioClip ExplodeSound;
     public float MaxInteractRange;
     
     private SpriteRenderer _renderer;
@@ -20,6 +22,9 @@ public class Interacter : MonoBehaviour
     private GridItem _highlightedItem;
     private Client _client;
     private GrabbyHandBehavior _grabbyHand;
+    private AudioSource _audioSource;
+    private Animator _playerAnimator;
+    private PlayerController _playerController;
 
     public int CorrectItems;
     public int WrongItems;
@@ -28,6 +33,9 @@ public class Interacter : MonoBehaviour
     {
         _client = GetComponent<Client>();
         _grabbyHand = GetComponent<GrabbyHandBehavior>();
+        _audioSource = GetComponent<AudioSource>();
+        _playerAnimator = LocalPlayerTransform.GetComponentInChildren<Animator>();
+        _playerController = LocalPlayerTransform.GetComponent<PlayerController>();
         _mainCamera = Camera.main;
     }
 
@@ -106,12 +114,18 @@ public class Interacter : MonoBehaviour
             if (_client.IsMyGuessCorrect(_highlightedItem.Id))
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.green);
-                CorrectItems += 1;
+                CorrectItems += 1; 
+                
+                _audioSource.PlayOneShot(DingSound);
             }
             else
             {
                 _renderer.material.SetColor("Color_BC0A261F", Color.red);
                 WrongItems += 1;
+                
+                _audioSource.PlayOneShot(ExplodeSound);
+                _playerAnimator.Play("girl_explode");
+                _playerController.enabled = false;
             }
             
             UpdateStatusText();

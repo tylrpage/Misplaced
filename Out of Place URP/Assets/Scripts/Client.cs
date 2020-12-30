@@ -327,6 +327,8 @@ public class Client : MonoBehaviour
                 }
                 // Teleport to waiting room
                 LocalPlayerTransform.position = WaitingRoomLocation.position;
+                // Let player walk again incase they exploded
+                LocalPlayerTransform.GetComponent<PlayerController>().enabled = true;
 
                 StatusText.enabled = true;
                 StatusText.text = "Generating scores...";
