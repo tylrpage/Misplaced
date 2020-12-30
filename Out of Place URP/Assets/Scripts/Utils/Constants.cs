@@ -20,7 +20,7 @@ public static class Constants
     public static readonly int GRID_UNITS = 1;
     public static readonly BoundedRange[] WORLD_BOUNDS = new BoundedRange[3]
     {
-        new BoundedRange(-19f, 15f, 0.05f),
+        new BoundedRange(-19f, 30f, 0.05f),
         new BoundedRange(-2f, 12f, 0.05f),
         new BoundedRange(0f, 50f, 0.05f),
     };

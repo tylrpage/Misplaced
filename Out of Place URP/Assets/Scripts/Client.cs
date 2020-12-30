@@ -40,6 +40,7 @@ public class Client : MonoBehaviour
     private AudioSource _audioSource;
     private Vector3 _previousPlayerPosition = Vector3.zero;
     private bool _overrideDirtySendRule = false;
+    private bool _wasConnected = false;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -62,7 +63,16 @@ public class Client : MonoBehaviour
     private void WebClientOnonDisconnect()
     {
         StatusText.enabled = true;
-        StatusText.text = "You were disconnected. The AFK timer is 45s. Refresh to rejoin.";
+        if (_wasConnected)
+        {
+            StatusText.text = "You were disconnected. The AFK timer is 45s. Refresh to rejoin.";
+        }
+        else
+        {
+            StatusText.text = "Could not reach server";
+        }
+
+        _wasConnected = false;
     }
 
     public void Connect()
@@ -223,6 +233,7 @@ public class Client : MonoBehaviour
     private void WebClientOnonConnect()
     {
         Debug.Log("Client connected");
+        _wasConnected = true;
         
         // Hide the connect screen
         ConnectUIController.HideConnectScreen();
