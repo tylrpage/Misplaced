@@ -41,6 +41,7 @@ public class Client : MonoBehaviour
     private Vector3 _previousPlayerPosition = Vector3.zero;
     private bool _overrideDirtySendRule = false;
     private bool _wasConnected = false;
+    private MusicController _musicController;
     
     public Dictionary<ushort, Tuple<int, int>> MovedItems;
 
@@ -50,6 +51,7 @@ public class Client : MonoBehaviour
         _timerTextController = GetComponent<TimerTextController>();
         _scoreboardController = GetComponent<ScoreboardController>();
         _audioSource = GetComponent<AudioSource>();
+        _musicController = GetComponentInChildren<MusicController>();
         
         TcpConfig tcpConfig = new TcpConfig(true, 5000, 45000);
         _webClient = SimpleWebClient.Create(16*1024, 1000, tcpConfig);
@@ -126,6 +128,7 @@ public class Client : MonoBehaviour
                 else
                 {
                     StatusText.text = "Waiting for current round to end...";
+                    _musicController.Pause();
                 }
 
                 _handShakeComplete = true;
@@ -157,6 +160,7 @@ public class Client : MonoBehaviour
                         Destroy(newPlayer.GetComponent<Rigidbody2D>());
                         Destroy(newPlayer.GetComponent<CircleCollider2D>());
                         Destroy(newPlayer.GetComponent<PlayerController>());
+                        Destroy(newPlayer.GetComponent<MusicController>());
                         PositionInterp positionInterp = newPlayer.GetComponent<PositionInterp>();
                         positionInterp.enabled = true;
                         _otherPlayers[id] = positionInterp;
@@ -356,6 +360,7 @@ public class Client : MonoBehaviour
                 }
                 
                 _timerTextController.SetTimer("Searching", Constants.SECONDS_WAITING_IN_SEARCH);
+                _musicController.Play();
                 
                 Debug.Log("New state: Search");
                 break;
@@ -377,6 +382,7 @@ public class Client : MonoBehaviour
                 StatusText.enabled = true;
                 StatusText.text = "Generating scores...";
                 _timerTextController.SetTimer("Scoring", Constants.SECONDS_WAITING_IN_SCORING);
+                _musicController.Pause();
                 
                 Debug.Log("New state: Scoring");
                 break;
