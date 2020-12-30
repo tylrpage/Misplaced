@@ -15,10 +15,6 @@ public class ScoreboardController : MonoBehaviour
     public void ResetScores()
     {
         _scores.Clear();
-        foreach (var entryObject in _entryObjects)
-        {
-            Destroy(entryObject);
-        }
     }
 
     public void UpdateEntry(ushort id, string name, short score)
@@ -26,12 +22,24 @@ public class ScoreboardController : MonoBehaviour
         _scores[id] = new Tuple<string, short>(name, score);
     }
 
+    public void RemoveEntry(ushort id)
+    {
+        _scores.Remove(id);
+    }
+
     public void DrawBoard()
     {
+        // Delete old entry objects
+        foreach (var entryObject in _entryObjects)
+        {
+            Destroy(entryObject);
+        }
+        _entryObjects.Clear();
+        
         var scoresList = _scores.Values.ToList();
         scoresList.Sort((x, y) =>
         {
-            return x.Item2.CompareTo(y.Item2);
+            return y.Item2.CompareTo(x.Item2);
         });
 
         int count = 0;
@@ -44,6 +52,8 @@ public class ScoreboardController : MonoBehaviour
             newEntry.transform.localPosition = Vector3.down * count;
 
             newEntry.GetComponent<TextMeshPro>().text = scoreItem.Item1 + ": " + scoreItem.Item2;
+
+            count++;
         }
     }
 }

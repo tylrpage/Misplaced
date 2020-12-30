@@ -74,6 +74,9 @@ public class Client : MonoBehaviour
             case 2:
             {
                 _myId = _bitBuffer.ReadUShort();
+                // Put my name into _names too
+                _names[_myId] = ConnectUIController.DisplayName;
+                
                 _currentState = (GameState)_bitBuffer.ReadByte();
                 // Read all the ids and names it gives me and store it into _names to be used when players get spawned
                 ushort count = _bitBuffer.ReadUShort();
@@ -91,9 +94,6 @@ public class Client : MonoBehaviour
                 }
                 _scoreboardController.DrawBoard();
 
-                // Put my name into _names too for when I am the builder
-                _names[_myId] = ConnectUIController.DisplayName;
-                
                 HandleStateChange(_currentState);
                 _handShakeComplete = true;
                 break;
@@ -142,6 +142,9 @@ public class Client : MonoBehaviour
                     Destroy(_otherPlayers[id].gameObject);
                     _otherPlayers.Remove(id);
                 }
+                
+                _scoreboardController.RemoveEntry(id);
+                _scoreboardController.DrawBoard();
 
                 break;
             }
@@ -174,6 +177,10 @@ public class Client : MonoBehaviour
                 ushort id = _bitBuffer.ReadUShort();
                 string name = _bitBuffer.ReadString();
                 _names[id] = name;
+                
+                // Add this new guy to the scoreboard
+                _scoreboardController.UpdateEntry(id, name, 0);
+                _scoreboardController.DrawBoard();
 
                 break;
             }
