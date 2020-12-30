@@ -143,7 +143,7 @@ namespace Server
                                 _currentState = GameState.Search;
                             }
                             else {
-                                foreach(PlayerData data in _playerDatas.Values) {
+                                foreach(PlayerData data in _playerDatas) {
                                     if (data.id != _builderId) {
                                         data.points += 1;
                                     }

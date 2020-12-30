@@ -137,20 +137,11 @@ namespace Server
                                 playerData.guesses.Clear();
                             }
 
-                            // Make sure builder actually moved something,
-                            // if he didnt, goto scoring and give everyone else a point
-                            if (_movedObjects.Count > 0) {
-                                _currentState = GameState.Search;
+                            // Make sure builder actually moved something
+                            if (_movedObjects.Count == 0) {
+                                _currentState = GameState.Begin;
                             }
-                            else {
-                                foreach(PlayerData data in _playerDatas.Values) {
-                                    if (data.id != _builderId) {
-                                        data.points += 1;
-                                    }
-                                }
-                                _currentState = GameState.Scoring;
-                            }
-                            
+                            _currentState = GameState.Search;
                             SendStateUpdate(_currentState);
                         };
                         break;

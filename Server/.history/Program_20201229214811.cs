@@ -138,16 +138,11 @@ namespace Server
                             }
 
                             // Make sure builder actually moved something,
-                            // if he didnt, goto scoring and give everyone else a point
+                            // if he didnt, find a new one
                             if (_movedObjects.Count > 0) {
                                 _currentState = GameState.Search;
                             }
                             else {
-                                foreach(PlayerData data in _playerDatas.Values) {
-                                    if (data.id != _builderId) {
-                                        data.points += 1;
-                                    }
-                                }
                                 _currentState = GameState.Scoring;
                             }
                             
