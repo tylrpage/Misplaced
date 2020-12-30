@@ -9,7 +9,7 @@ public class ScoreboardController : MonoBehaviour
 {
     [SerializeField] private GameObject EntryPrefab;
     [SerializeField] private Transform EntryScoreboardParent;
-    private Dictionary<ushort, Tuple<string, short>> _scores;
+    private Dictionary<ushort, Tuple<string, short>> _scores = new Dictionary<ushort, Tuple<string, short>>();
     private List<GameObject> _entryObjects = new List<GameObject>();
 
     public void ResetScores()
@@ -40,7 +40,7 @@ public class ScoreboardController : MonoBehaviour
         {
             newEntry = Instantiate(EntryPrefab);
             _entryObjects.Add(newEntry);
-            newEntry.transform.parent = EntryScoreboardParent;
+            newEntry.transform.SetParent(EntryScoreboardParent, false);
             newEntry.transform.localPosition = Vector3.down * count;
 
             newEntry.GetComponent<TextMeshPro>().text = scoreItem.Item1 + ": " + scoreItem.Item2;

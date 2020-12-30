@@ -202,8 +202,7 @@ namespace Server
         static void WebServerOnConnect(int id) {
             _connectedIds.Add(id);
             _playerDatas[id] = new PlayerData() {
-                id = (ushort)id,
-                handshaked = false
+                id = (ushort)id
             };
 
             _bitBuffer.ToArray(_buffer);

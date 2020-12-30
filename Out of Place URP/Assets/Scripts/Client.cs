@@ -85,6 +85,8 @@ public class Client : MonoBehaviour
                     short score = _bitBuffer.ReadShort();
                     _names[id] = name;
                     
+                    Debug.Log("id: " + id + ", name: " + name);
+                    
                     _scoreboardController.UpdateEntry(id, name, score);
                 }
                 _scoreboardController.DrawBoard();
