@@ -371,6 +371,8 @@ public class Client : MonoBehaviour
                 if (_myId == _builderId)
                 {
                     ExitBuildingMode();
+                    StatusText.enabled = true;
+                    StatusText.text = "Waiting for other players to spot the difference";
                 }
                 else
                 {
@@ -387,8 +389,12 @@ public class Client : MonoBehaviour
             {
                 // Reset all items and outlines
                 _moveableReferencer.ResetMoveables();
-                
-                if (_myId != _builderId)
+
+                if (_myId == _builderId)
+                {
+                    ExitBuildingMode();
+                }
+                else
                 {
                     ExitSearchMode();
                 }
@@ -419,8 +425,6 @@ public class Client : MonoBehaviour
     {
         GetComponent<Builder>().enabled = false;
         ExitingBuildingMode?.Invoke();
-        StatusText.enabled = true;
-        StatusText.text = "Waiting for other players to spot the difference";
     }
     
     private void BuilderOnObjectMoved(ushort objectId, int newX, int newY)

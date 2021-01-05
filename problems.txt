@@ -1,21 +1,12 @@
 Problems:
 
-- Server recognizes player count based on people who have connected not shaken hands
-  - When the server is extremely slow, this can cause it to fail, goes to builder mode and nobody
-    is builder
-
-- Smooth the light
-- Light doesnt go through walls
 
 todo:
-
-- explode if got something wrong
-- bug: extra players cant see old players characters
-
-- tutorial
-- more building time?
-- didn't get teleported over to play area for searching?
-- bug: Kept moving after exploding
-- bug: can still choose things after exploded
-- bug: cant see people moving on left side
-- not hectic
+- Play sound effect when player joins
+- Client sends pulse signals in waiting room so you dont get kicked for afk in waiting
+- add text chat
+- investigate scoring bugs with searcher getting a point then dying
+- If builder doesnt build, he is still in build mode after build phase
+ - text on map indicating side
+- Press enter to connect
+- disallow double pressing connect button
