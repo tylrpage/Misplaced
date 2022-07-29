@@ -2,10 +2,11 @@
 using Mirror.SimpleWeb;
 using System.Security.Authentication;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NetStack.Serialization;
-using NetStack.Quantization;
 using System.Timers;
-using System.Linq;
+using System.Threading;
+using Timer = System.Timers.Timer;
 
 namespace Server
 {
@@ -84,12 +85,27 @@ namespace Server
             _webServer.onData += WebServerOnData;
             _webServer.onDisconnect += WebServerOnDisconnect;
 
-            Timer stateUpdateTimer = new Timer(1f / Constants.SERVER_TICKRATE * 1000);
+            int mainLoopIntervalMs = (int)(1f / Constants.SERVER_TICKRATE * 1000);
+            Timer stateUpdateTimer = new Timer(mainLoopIntervalMs);
             stateUpdateTimer.Elapsed += StateUpdateTimerOnElapsed;
             stateUpdateTimer.AutoReset = true;
             stateUpdateTimer.Enabled = true;
+            
+            Console.WriteLine($"Main loop interval: {mainLoopIntervalMs} ms");
 
-            while (true) {
+            Stopwatch stopwatch = new Stopwatch();
+
+            while (true)
+            {
+                // Limit while loop frequency
+                stopwatch.Stop();
+                int millisecondsToSleep = mainLoopIntervalMs - (int)stopwatch.ElapsedMilliseconds;
+                if (millisecondsToSleep > 0)
+                {
+                    Thread.Sleep(millisecondsToSleep);
+                }
+                stopwatch.Start();
+                
                 _webServer.ProcessMessageQueue();
 
                 // GUARD, DONT DO STATE STUFF IF WE ARE WAITING
@@ -210,8 +226,8 @@ namespace Server
                 }
             }
 
-            Console.WriteLine("Closing server");
-            _webServer.Stop();
+            // Console.WriteLine("Closing server");
+            // _webServer.Stop();
         }
 
         static void WebServerOnConnect(int id) {
@@ -223,6 +239,8 @@ namespace Server
 
             _bitBuffer.ToArray(_buffer);
             _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 5 + _playerDatas.Count * 20));
+            
+            Console.WriteLine($"Player connected, player count: {_playerDatas.Count}");
         }
 
         static void WebServerOnData(int id, ArraySegment<byte> data) {
@@ -338,6 +356,8 @@ namespace Server
                 _currentState = GameState.Waiting;
                 SendStateUpdate(_currentState);
             }
+            
+            Console.WriteLine($"Player disconnected, player count: {_playerDatas.Count}");
         }
 
         private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
