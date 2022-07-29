@@ -259,7 +259,7 @@ public class Client : MonoBehaviour
         
         if (_webClient.ConnectionState == ClientState.Connected && Time.time >= _timeToSendNextUpdate)
         {
-            _timeToSendNextUpdate = Time.time + (1f / Constants.CLIENT_TICKRATE);
+            _timeToSendNextUpdate = Time.time + (1f / Constants.SERVER_TICKRATE);
 
             // GUARD, DONT SEND POSITION IF WE DIDN'T MOVE
             if (!_overrideDirtySendRule && (_previousPlayerPosition - LocalPlayerTransform.position).magnitude < 0.1f)

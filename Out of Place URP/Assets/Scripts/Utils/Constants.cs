@@ -7,7 +7,7 @@ public static class Constants
 {
     // SERVER + CLIENT
     public static readonly ushort GAME_PORT = 9002;
-    public static readonly ushort SERVER_TICKRATE = 25;
+    public static readonly ushort SERVER_TICKRATE = 15;
     public static readonly int MAX_SHIFTED_OBJECTS = 2;
     public static readonly float SECONDS_WAITING_IN_BEGIN = 7f;
     public static readonly float SECONDS_WAITING_IN_BUILD = 15f;
@@ -24,8 +24,7 @@ public static class Constants
         new BoundedRange(-2f, 12f, 0.05f),
         new BoundedRange(0f, 50f, 0.05f),
     };
-
-    public static readonly int CLIENT_TICKRATE = 25;
+    
     public static readonly int[] CAMERA_REF_RESOLUTION = new[] {800, 480};
     public static readonly int CAMERA_ASSET_PPU = 64;
 }
