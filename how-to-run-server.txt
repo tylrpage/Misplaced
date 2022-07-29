@@ -1,0 +1,2 @@
+how to run server:
+execute ./bin/Release/net5.0/linux-x64/publish/Server
