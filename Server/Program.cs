@@ -10,7 +10,8 @@ using Timer = System.Timers.Timer;
 
 namespace Server
 {
-    public class PlayerData {
+    public class PlayerData
+    {
         public ushort id;
         public string name;
         public bool handshaked;
@@ -20,7 +21,8 @@ namespace Server
         public List<ushort> guesses;
 
         // Default ctor
-        public PlayerData() {
+        public PlayerData()
+        {
             id = ushort.MaxValue;
             name = "";
             handshaked = false;
@@ -31,7 +33,8 @@ namespace Server
         }
 
         // Copy ctor
-        public PlayerData(PlayerData copy) {
+        public PlayerData(PlayerData copy)
+        {
             id = copy.id;
             name = copy.name;
             handshaked = copy.handshaked;
@@ -41,6 +44,7 @@ namespace Server
             guesses = copy.guesses;
         }
     }
+
     class Program
     {
         public static readonly float SECONDS_WAITING_IN_BEGIN = 5f;
@@ -60,7 +64,15 @@ namespace Server
         private static BitBuffer _bitBuffer = new BitBuffer(1024);
         private static byte[] _buffer = new byte[2048];
 
-        enum GameState {Waiting = 0, Begin, Builder, Search, Scoring}
+        enum GameState
+        {
+            Waiting = 0,
+            Begin,
+            Builder,
+            Search,
+            Scoring
+        }
+
         private static GameState _currentState = GameState.Waiting;
         private static Dictionary<ushort, Tuple<ushort, ushort>> _movedObjects;
         private static bool _waitingOnStateTimer = false;
@@ -69,6 +81,8 @@ namespace Server
 
         private static Random _rand;
 
+        private static ManualResetEvent _quitEvent = new ManualResetEvent(false);
+
         static void Main(string[] args)
         {
             _rand = new Random(Environment.TickCount);
@@ -76,8 +90,12 @@ namespace Server
             SslConfig sslConfig;
             TcpConfig tcpConfig = new TcpConfig(true, 5000, 45000);
             Console.WriteLine("Setting up secure server");
+            
             sslConfig = new SslConfig(true, "cert.pfx", "", SslProtocols.Tls12);
-            _webServer = new SimpleWebServer(10000, tcpConfig, 16*1024, 3000, sslConfig);
+            // un comment for unsecure server (ws://)
+            //sslConfig = new SslConfig(false, "", "", SslProtocols.Tls12);
+            
+            _webServer = new SimpleWebServer(10000, tcpConfig, 16 * 1024, 3000, sslConfig);
             _webServer.Start(Constants.GAME_PORT);
             Console.WriteLine("Server started");
 
@@ -90,165 +108,186 @@ namespace Server
             stateUpdateTimer.Elapsed += StateUpdateTimerOnElapsed;
             stateUpdateTimer.AutoReset = true;
             stateUpdateTimer.Enabled = true;
-            
+
             Console.WriteLine($"Main loop interval: {mainLoopIntervalMs} ms");
 
-            Stopwatch stopwatch = new Stopwatch();
-
-            while (true)
+            // Block thread until cancellation
+            CancellationTokenSource source = new CancellationTokenSource();
+            CancellationToken token = source.Token;
+            Console.CancelKeyPress += (sender, eventArgs) =>
             {
-                // Limit while loop frequency
-                stopwatch.Stop();
-                int millisecondsToSleep = mainLoopIntervalMs - (int)stopwatch.ElapsedMilliseconds;
-                if (millisecondsToSleep > 0)
-                {
-                    Thread.Sleep(millisecondsToSleep);
-                }
-                stopwatch.Start();
-                
-                _webServer.ProcessMessageQueue();
-
-                // GUARD, DONT DO STATE STUFF IF WE ARE WAITING
-                if (_waitingOnStateTimer) continue;
-                switch(_currentState) {
-                    case GameState.Waiting:
-                    {
-                        if (_handshakenClientCount >= 2 && _connectedIds.Count >= 2) {
-                            _currentState = GameState.Begin;
-                            SendStateUpdate(_currentState);
-                        }
-
-                        break;
-                    }
-                    case GameState.Begin:
-                    {
-                        // Set timer to go to builder state
-                        beginTimer = new Timer(SECONDS_WAITING_IN_BEGIN * 1000);
-                        beginTimer.AutoReset = false;
-                        beginTimer.Start();
-                        _waitingOnStateTimer = true;
-
-                        beginTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            _movedObjects = new Dictionary<ushort, Tuple<ushort, ushort>>();
-                            _currentState = GameState.Builder;
-                            SendStateUpdate(_currentState);
-                        };
-                        break;
-                    }
-                    case GameState.Builder:
-                    {
-                        // Set timer to go to builder state
-                        buildTimer = new Timer(SECONDS_WAITING_IN_BUILD * 1000);
-                        buildTimer.AutoReset = false;
-                        buildTimer.Start();
-                        _waitingOnStateTimer = true;
-
-                        buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            // Reset everyones guesses
-                            foreach (PlayerData playerData in _playerDatas.Values) {
-                                playerData.guesses.Clear();
-                            }
-
-                            // Make sure builder actually moved something,
-                            // if he didnt, goto scoring and give everyone else a point
-                            if (_movedObjects.Count > 0) {
-                                _currentState = GameState.Search;
-                            }
-                            else {
-                                foreach(PlayerData data in _playerDatas.Values) {
-                                    if (data.id != _builderId) {
-                                        data.points += 1;
-                                    }
-                                }
-                                _playerDatas[_builderId].points -= (short)_handshakenClientCount;
-                                _currentState = GameState.Scoring;
-                            }
-                            
-                            SendStateUpdate(_currentState);
-                        };
-                        break;
-                    }
-                    case GameState.Search:
-                    {
-                        // Set timer to go to scoring state
-                        searchTimer = new Timer(SECONDS_WAITING_IN_SEARCH * 1000);
-                        searchTimer.AutoReset = false;
-                        searchTimer.Start();
-                        _waitingOnStateTimer = true;
-
-                        searchTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            _currentState = GameState.Scoring;
-                            SendStateUpdate(_currentState);
-                        };
-                        break;
-                    }
-                    case GameState.Scoring:
-                    {
-                        // Set timer to wait for points to come in from clients
-                        scoringTimer = new Timer(SECONDS_WAITING_IN_SCORING * 1000);
-                        scoringTimer.AutoReset = false;
-                        scoringTimer.Start();
-                        _waitingOnStateTimer = true;
-
-                        scoringTimer.Elapsed += delegate(Object source, ElapsedEventArgs e) {
-                            _waitingOnStateTimer = false;
-
-                            // Tell everyone everyones scores
-                            _bitBuffer.Clear();
-                            _bitBuffer.AddByte(7);
-                            _bitBuffer.AddUShort((ushort)_playerDatas.Count);
-
-                            foreach (PlayerData data in _playerDatas.Values) {
-                                _bitBuffer.AddUShort(data.id);
-                                _bitBuffer.AddShort(data.points);
-                            }
-
-                            _bitBuffer.ToArray(_buffer);
-                            _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3 + 4 * _playerDatas.Count));
-
-                            if (_handshakenClientCount >= 2 && _connectedIds.Count >= 2) {
-                                _currentState = GameState.Begin;
-                            }
-                            else {
-                                _currentState = GameState.Waiting;
-                            }
-                            SendStateUpdate(_currentState);
-                        };
-
-                        break;
-                    }
-                }
-            }
-
-            // Console.WriteLine("Closing server");
-            // _webServer.Stop();
+                source.Cancel();
+                eventArgs.Cancel = true;
+            };
+            token.WaitHandle.WaitOne();
+            
+            Console.WriteLine("Closing server");
+            _webServer.Stop();
         }
 
-        static void WebServerOnConnect(int id) {
+        static void ProcessState()
+        {
+            _webServer.ProcessMessageQueue();
+            
+            if (_waitingOnStateTimer)
+                return;
+            
+            switch (_currentState)
+            {
+                case GameState.Waiting:
+                {
+                    if (_handshakenClientCount >= 2 && _connectedIds.Count >= 2)
+                    {
+                        _currentState = GameState.Begin;
+                        SendStateUpdate(_currentState);
+                    }
+
+                    break;
+                }
+                case GameState.Begin:
+                {
+                    // Set timer to go to builder state
+                    beginTimer = new Timer(SECONDS_WAITING_IN_BEGIN * 1000);
+                    beginTimer.AutoReset = false;
+                    beginTimer.Start();
+                    _waitingOnStateTimer = true;
+
+                    beginTimer.Elapsed += delegate(Object source, ElapsedEventArgs e)
+                    {
+                        _waitingOnStateTimer = false;
+
+                        _movedObjects = new Dictionary<ushort, Tuple<ushort, ushort>>();
+                        _currentState = GameState.Builder;
+                        SendStateUpdate(_currentState);
+                    };
+                    break;
+                }
+                case GameState.Builder:
+                {
+                    // Set timer to go to builder state
+                    buildTimer = new Timer(SECONDS_WAITING_IN_BUILD * 1000);
+                    buildTimer.AutoReset = false;
+                    buildTimer.Start();
+                    _waitingOnStateTimer = true;
+
+                    buildTimer.Elapsed += delegate(Object source, ElapsedEventArgs e)
+                    {
+                        _waitingOnStateTimer = false;
+
+                        // Reset everyones guesses
+                        foreach (PlayerData playerData in _playerDatas.Values)
+                        {
+                            playerData.guesses.Clear();
+                        }
+
+                        // Make sure builder actually moved something,
+                        // if he didnt, goto scoring and give everyone else a point
+                        if (_movedObjects.Count > 0)
+                        {
+                            _currentState = GameState.Search;
+                        }
+                        else
+                        {
+                            foreach (PlayerData data in _playerDatas.Values)
+                            {
+                                if (data.id != _builderId)
+                                {
+                                    data.points += 1;
+                                }
+                            }
+
+                            _playerDatas[_builderId].points -= (short)_handshakenClientCount;
+                            _currentState = GameState.Scoring;
+                        }
+
+                        SendStateUpdate(_currentState);
+                    };
+                    break;
+                }
+                case GameState.Search:
+                {
+                    // Set timer to go to scoring state
+                    searchTimer = new Timer(SECONDS_WAITING_IN_SEARCH * 1000);
+                    searchTimer.AutoReset = false;
+                    searchTimer.Start();
+                    _waitingOnStateTimer = true;
+
+                    searchTimer.Elapsed += delegate(Object source, ElapsedEventArgs e)
+                    {
+                        _waitingOnStateTimer = false;
+
+                        _currentState = GameState.Scoring;
+                        SendStateUpdate(_currentState);
+                    };
+                    break;
+                }
+                case GameState.Scoring:
+                {
+                    // Set timer to wait for points to come in from clients
+                    scoringTimer = new Timer(SECONDS_WAITING_IN_SCORING * 1000);
+                    scoringTimer.AutoReset = false;
+                    scoringTimer.Start();
+                    _waitingOnStateTimer = true;
+
+                    scoringTimer.Elapsed += delegate(Object source, ElapsedEventArgs e)
+                    {
+                        _waitingOnStateTimer = false;
+
+                        // Tell everyone everyones scores
+                        _bitBuffer.Clear();
+                        _bitBuffer.AddByte(7);
+                        _bitBuffer.AddUShort((ushort)_playerDatas.Count);
+
+                        foreach (PlayerData data in _playerDatas.Values)
+                        {
+                            _bitBuffer.AddUShort(data.id);
+                            _bitBuffer.AddShort(data.points);
+                        }
+
+                        _bitBuffer.ToArray(_buffer);
+                        _webServer.SendAll(_connectedIds,
+                            new ArraySegment<byte>(_buffer, 0, 3 + 4 * _playerDatas.Count));
+
+                        if (_handshakenClientCount >= 2 && _connectedIds.Count >= 2)
+                        {
+                            _currentState = GameState.Begin;
+                        }
+                        else
+                        {
+                            _currentState = GameState.Waiting;
+                        }
+
+                        SendStateUpdate(_currentState);
+                    };
+
+                    break;
+                }
+            }
+        }
+
+        static void WebServerOnConnect(int id)
+        {
             _connectedIds.Add(id);
-            _playerDatas[id] = new PlayerData() {
+            _playerDatas[id] = new PlayerData()
+            {
                 id = (ushort)id,
                 handshaked = false
             };
 
             _bitBuffer.ToArray(_buffer);
             _webServer.SendOne(id, new ArraySegment<byte>(_buffer, 0, 5 + _playerDatas.Count * 20));
-            
+
             Console.WriteLine($"Player connected, player count: {_playerDatas.Count}");
         }
 
-        static void WebServerOnData(int id, ArraySegment<byte> data) {
+        static void WebServerOnData(int id, ArraySegment<byte> data)
+        {
             _bitBuffer.Clear();
             _bitBuffer.FromArray(data.Array, data.Count);
 
             byte messageId = _bitBuffer.ReadByte();
-            switch (messageId) {
+            switch (messageId)
+            {
                 case 1:
                 {
                     uint qX = _bitBuffer.ReadUInt();
@@ -260,7 +299,7 @@ namespace Server
 
                     // Send this position to everyone next state packet
                     _dataToSend.Enqueue(playerData);
-                    
+
                     break;
                 }
                 case 8:
@@ -313,7 +352,8 @@ namespace Server
                     _playerDatas[id].points += pointChange;
 
                     // If points are 0 or less, give builder a point
-                    if (pointChange <= 0) {
+                    if (pointChange <= 0)
+                    {
                         _playerDatas[_builderId].points += 1;
                     }
 
@@ -332,8 +372,10 @@ namespace Server
             }
         }
 
-        static void WebServerOnDisconnect(int id) {
-            if (_playerDatas[id].handshaked) {
+        static void WebServerOnDisconnect(int id)
+        {
+            if (_playerDatas[id].handshaked)
+            {
                 _handshakenClientCount -= 1;
             }
 
@@ -348,7 +390,8 @@ namespace Server
             _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 3));
 
             // Check if we have less than 2 players and should cancel the game
-            if (_currentState != GameState.Waiting && _handshakenClientCount < 2) {
+            if (_currentState != GameState.Waiting && _handshakenClientCount < 2)
+            {
                 beginTimer?.Stop();
                 buildTimer?.Stop();
                 searchTimer?.Stop();
@@ -356,15 +399,19 @@ namespace Server
                 _currentState = GameState.Waiting;
                 SendStateUpdate(_currentState);
             }
-            
+
             Console.WriteLine($"Player disconnected, player count: {_playerDatas.Count}");
         }
 
-        private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e) {
+        private static void StateUpdateTimerOnElapsed(Object source, ElapsedEventArgs e)
+        {
+            ProcessState();
+            
             _bitBuffer.Clear();
             _bitBuffer.AddByte(3);
             _bitBuffer.AddUShort((ushort)_dataToSend.Count);
-            foreach (PlayerData playerData in _dataToSend) {
+            foreach (PlayerData playerData in _dataToSend)
+            {
                 _bitBuffer.AddUShort(playerData.id);
                 _bitBuffer.AddUInt(playerData.qX);
                 _bitBuffer.AddUInt(playerData.qY);
@@ -376,7 +423,8 @@ namespace Server
             _dataToSend.Clear();
         }
 
-        private static void SendStateUpdate(GameState currentState) {
+        private static void SendStateUpdate(GameState currentState)
+        {
             Console.WriteLine("Changing state to: " + currentState.ToString());
             _waitingOnStateTimer = false;
 
@@ -385,7 +433,8 @@ namespace Server
             _bitBuffer.AddByte((byte)currentState);
 
             // Chose a random builder and tell everyone
-            if (currentState == GameState.Begin) {
+            if (currentState == GameState.Begin)
+            {
                 // Look for a builder who wasn't builder last round AND EXISTS
                 //bool foundValidBuilder = false;
                 //ushort attempts = 0;
@@ -406,38 +455,43 @@ namespace Server
                 // }
 
                 bool validBuilderFound = false;
-                while (!validBuilderFound) {
+                while (!validBuilderFound)
+                {
                     int randomIndex = _rand.Next(0, _connectedIds.Count);
                     int randomId = _connectedIds[randomIndex];
-                    if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId) {
+                    if (_playerDatas[randomId].handshaked && randomId != _lastBuilderId)
+                    {
                         validBuilderFound = true;
                         _builderId = randomId;
                         _lastBuilderId = randomId;
                     }
                 }
-                
+
                 _bitBuffer.AddUShort((ushort)_builderId);
 
                 _bitBuffer.ToArray(_buffer);
                 _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 6));
             }
             // Tell everyone the moved items
-            else if (currentState == GameState.Search) {
+            else if (currentState == GameState.Search)
+            {
                 _bitBuffer.AddUShort((ushort)_movedObjects.Count);
-                foreach (var movedObject in _movedObjects) {
+                foreach (var movedObject in _movedObjects)
+                {
                     _bitBuffer.AddUShort(movedObject.Key);
                     _bitBuffer.AddUShort(movedObject.Value.Item1);
                     _bitBuffer.AddUShort(movedObject.Value.Item2);
                 }
 
                 _bitBuffer.ToArray(_buffer);
-                _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 6 + 12 * Constants.MAX_SHIFTED_OBJECTS));
+                _webServer.SendAll(_connectedIds,
+                    new ArraySegment<byte>(_buffer, 0, 6 + 12 * Constants.MAX_SHIFTED_OBJECTS));
             }
-            else {
+            else
+            {
                 _bitBuffer.ToArray(_buffer);
                 _webServer.SendAll(_connectedIds, new ArraySegment<byte>(_buffer, 0, 2));
             }
-            
         }
     }
 }
