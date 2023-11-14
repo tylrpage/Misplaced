@@ -1,2 +1,2 @@
-dotnet publish -r ubuntu.22.04-x64 -p:PublishSingleFile=true -c Release --self-contained false
-Note: not self-contained, so server needs .net6 runtime
+dotnet publish -r ubuntu.22.04-x64 -p:PublishSingleFile=true -c Release --self-contained
+Note: self-contained, so no dotnet framework should be needed to run

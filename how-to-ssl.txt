@@ -1,0 +1,3 @@
+Use certbot renew on the droplet to renew the cert
+create a .pfx with "openssl pkcs12 -export -out cert.pfx -inkey privkey.pem -in fullchain.pem" (no password)
+copy the cert.pfx to the game server root
